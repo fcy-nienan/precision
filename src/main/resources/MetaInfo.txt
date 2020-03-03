@@ -1,0 +1,3 @@
+2611:subCompany:分公司:enum:=,in
+2612:supCompany:中支公司:enum:=,in
+2613:sex:性别:enum:=,in

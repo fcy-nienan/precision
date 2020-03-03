@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>precision</title>
+    <link href="../../../resources/static/fSelect.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="../../../resources/static/demo.css">
+    <style>
+        /*body { font-family:'Open Sans';}*/
+        /*.container { margin:10px auto; max-width:640px;}*/
+    </style>
+</head>
+<body>
+<!--    <div class="container">-->
+<div class="condition">
+
+</div>
+<select class="demo" multiple="multiple">
+    <option value="asp">ASP</option>
+    <option value="jsp">JSP</option>
+</select>
+<select class="demo1" multiple="multiple">
+    <option value="asp">ASP</option>
+    <option value="jsp">JSP</option>
+</select>
+<select class="demo2" multiple="multiple">
+    <option value="asp">ASP</option>
+    <option value="jsp">JSP</option>
+</select>
+
+<!--    </div>-->
+    <script src="../../../resources/static/jquery.min.js"></script>
+    <script src="../../../resources/static/fSelect.js"></script>
+    <script>
+        $(function() {
+            $('.demo').fSelect();
+            $('.demo1').fSelect();
+            $('.demo2').fSelect();
+        });
+    </script>
+</div>
+
+</body>
+</html>
