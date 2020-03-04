@@ -1,10 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
+    <meta charset="UTF-8"/>
+    <script src="iview/vue.min.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="iview/iview.css">
+    <!-- 引入组件库 -->
+    <script src="iview/iview.min.js"></script>
+    <script src="https://cdn.staticfile.org/vue-resource/1.5.1/vue-resource.min.js"></script>
 </head>
 <body>
-$END$
+<div id="app">
+        <i-select :model.sync="x" size="small" style="width:100px">
+            <i-option v-for="item in cityList" :value="item.value">{{ item.label }}</i-option>
+        </i-select>
+        <p>{{ x }}</p>
+        <i-select :model.sync="model3" style="width:100px">
+            <i-option v-for="item in cityList" :value="item.value">{{ item.label }}</i-option>
+        </i-select>
+        <i-select :model.sync="model4" size="large" style="width:100px">
+            <i-option v-for="item in cityList" :value="item.value">{{ item.label }}</i-option>
+        </i-select>
+</div>
+<script>
+    var x='';
+    new Vue({
+        el:"#app",
+        data () {
+            return {
+                cityList: [
+                    {
+                        value: 'beijing',
+                        label: '北京市'
+                    },
+                    {
+                        value: 'shanghai',
+                        label: '上海市'
+                    },
+                    {
+                        value: 'shenzhen',
+                        label: '深圳市'
+                    },
+                    {
+                        value: 'hangzhou',
+                        label: '杭州市'
+                    },
+                    {
+                        value: 'nanjing',
+                        label: '南京市'
+                    },
+                    {
+                        value: 'chongqing',
+                        label: '重庆市'
+                    }
+                ],
+                model2: '',
+                model3: '',
+                model4: ''
+            }
+        }
+    })
+</script>
 </body>
 </html>

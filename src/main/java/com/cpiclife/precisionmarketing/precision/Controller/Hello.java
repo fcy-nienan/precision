@@ -6,10 +6,12 @@ import com.cpiclife.precisionmarketing.precision.service.PrecisionMetaInfoServic
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /*
@@ -34,15 +36,34 @@ public class Hello {
     public String task(){
         return "precisionTask";
     }
+
     @RequestMapping("/data")
     @ResponseBody
     public List<PrecisionSelectVO> data() throws Exception {
         System.out.println(infoService.getCanSelectCondition());
         return infoService.getCanSelectCondition();
     }
-    @RequestMapping("/Condition")
-    public String Condition(HttpServletRequest request) throws Exception {
-        System.out.println(request.getServletContext().getRealPath("/"));
-        return "Condition";
+    private static HashMap<String,String> map=new HashMap();
+    @RequestMapping("/save")
+    @ResponseBody
+    public String save(@RequestParam("value")String jsonString,@RequestParam("userId")String userId,
+                       @RequestParam("taskId")String taskId)throws Exception {
+        map.put(userId+":"+taskId,jsonString);
+        System.out.println(userId+":"+taskId+"----"+jsonString);
+        return "success";
+    }
+    @RequestMapping("/selectedCondition")
+    @ResponseBody
+    public String selectedCondition(@RequestParam("userId")String userId,
+                                    @RequestParam("taskId")String taskId)throws Exception{
+        String str=userId+":"+taskId;
+        System.out.println(userId+":"+taskId);
+        return map.get(str);
+    }
+    @RequestMapping("/cancel")
+    @ResponseBody
+    public String cancelCount(@RequestParam("userId")String userId,
+                              @RequestParam("taskId")String taskId)throws Exception{
+        return "success";
     }
 }

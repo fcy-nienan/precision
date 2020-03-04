@@ -2,9 +2,77 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <script src="https://unpkg.com/vue@2.1.10/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue-select@2.0.0/dist/vue-select.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" />  
+
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="iview/iview.css">
+    <!-- 引入组件库 -->
+    <script src="iview/iview.min.js"></script>
+    <script src="https://cdn.staticfile.org/vue-resource/1.5.1/vue-resource.min.js"></script>
 </head>
 <body>
+<div id="app">
+    <Row>
+        <i-col span="6">
+        </i-col>
+        <i-col span="6">
+<!--            <v-select :placeholder="请输入条件"></v-select>-->
+        </i-col>
+        <i-col span="4" style="width:30px;">                               </i-col>
+        <i-col span="10">
+            <v-select :placeholder="placeholderData"
+                      :options="options"
+                      label="name"
+                      @input="select_student"
+            ></v-select>
+        </i-col>
+    </Row>
+    <i-button type="info" @click="cancel">取消</i-button>
+    <i-button type="info" @click="save">保存</i-button>
+</div>
+<script>
+    var operatorValueList=new Array()
+    var enumCodeList=new Array()
+    var multipleList=new Array()
+    var variableSize=0;
+    Vue.component('v-select', VueSelect.VueSelect);
+    vm = new Vue({
+        el:"#app",
+        data () {
+            return {
+                placeholderData:"请输入枚举值",
+                options: [
+                    {"student_id": 1, "name": "Vence"},
+                    {"student_id": 2, "name": "Job"},
+                    {"student_id": 3, "name": "Jack"},
+                ],
+                students:[1],
+                student_obj:[]
+            }
+        },
+        mounted:function () {
+            // var student_filter = function (obj) {
+            //     return this.students.indexOf(obj.student_id) > -1
+            // }
+            // this.student_obj = this.options.filter(student_filter, this)
+        },
+        methods:{
+            select_student: function(values){
+                this.students =values.map(function(obj){
+                    return obj.student_id
+                })
+            },
+            save:function () {
+                console.log(this.students)
+                console.log(this.student_obj)
+            },
+            cancel:function () {
 
+            }
+        }
+    })
+</script>
 </body>
 </html>
