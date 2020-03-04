@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Component("precisionMetaInfoService")
 public class PrecisionMetaInfoService {
-    public List<PrecisionSelectVO> makeData() throws Exception {
+    public List<PrecisionSelectVO> getCanSelectCondition() throws Exception {
         List<PrecisionSelectVO> result=new ArrayList<>();
         List<PrecisionMetaInfo> metaInfos=PrecisionMetaInfo.getDefault();
         List<PrecisionMetaEnumInfo> metaEnumInfos=PrecisionMetaEnumInfo.getDefault();
@@ -24,9 +24,21 @@ public class PrecisionMetaInfoService {
                     list.add(PrecisionMetaEnumInfo);
                 }
             }
-            PrecisionSelectVO vo=new PrecisionSelectVO(PrecisionMetaInfo,list);
+            List<String> res=operatorsList(PrecisionMetaInfo.getSupportOperators());
+            PrecisionSelectVO vo=new PrecisionSelectVO(PrecisionMetaInfo,list,res);
             result.add(vo);
         }
         return result;
+    }
+    private List<String> operatorsList(String supportOperators){
+        List<String> result=new ArrayList<>();
+        for (String s : supportOperators.split(",")) {
+            result.add(s);
+        }
+        return result;
+    }
+
+    public static void main(String[] args) throws Exception {
+        System.out.println(new PrecisionMetaInfoService().getCanSelectCondition());
     }
 }

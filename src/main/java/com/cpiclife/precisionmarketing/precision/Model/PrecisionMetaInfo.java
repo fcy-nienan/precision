@@ -15,11 +15,7 @@ public class PrecisionMetaInfo {
     private String fieldName;
     private String fieldType;
     private String supportOperators;
-    private List<String> operatorsList;
 
-    public static void main(String[] args) throws Exception {
-        System.out.println(getDefault());
-    }
     public static List<PrecisionMetaInfo> getDefault()throws Exception{
         BufferedReader reader=new BufferedReader(new InputStreamReader((PrecisionMetaInfo.class.getResourceAsStream("/MetaInfo.txt"))));
         String msg="";
@@ -31,14 +27,6 @@ public class PrecisionMetaInfo {
             result.add(info);
         }
         reader.close();
-        return result;
-    }
-    public List<String> operatorsList(){
-        List<String> result=new ArrayList<>();
-        for (String s : this.supportOperators.split(",")) {
-            result.add(s);
-        }
-        System.out.println(Arrays.toString(result.toArray()));
         return result;
     }
 

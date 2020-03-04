@@ -1,46 +1,119 @@
-<!doctype html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>precision</title>
-    <link href="../../../resources/static/fSelect.css" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" type="text/css" href="../../../resources/static/demo.css">
-    <style>
-        /*body { font-family:'Open Sans';}*/
-        /*.container { margin:10px auto; max-width:640px;}*/
-    </style>
+    <meta charset="UTF-8"/>
+    <script src="iview/vue.min.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="iview/iview.css">
+    <!-- 引入组件库 -->
+    <script src="iview/iview.min.js"></script>
+    <script src="https://cdn.staticfile.org/vue-resource/1.5.1/vue-resource.min.js"></script>
 </head>
 <body>
-<!--    <div class="container">-->
-<div class="condition">
-
+<div id="app">
+    <template v-for="(vo,index) in condition">
+        <Row>
+            <i-col span="6">
+                {{ vo.metaInfo.fieldName }}
+            </i-col>
+            <i-col span="6">
+                <i-select :model.sync="operatorValueList[index]" @on-change="operatorChange($event,vo.metaInfo.fieldCode,index)"  placeholder="请选择关系" clearable style="width:260px">
+                    <i-option v-for="(operator,index) in vo.operators" :value="operator">{{ operator }}</i-option>
+                </i-select>
+            </i-col>
+            <i-col span="10">
+                <i-select :model.sync="enumCodeList[index]" @on-change="prechange($event,vo.metaInfo.fieldId)"  :mulitple="multiFlag[index]" placeholder="枚举值" style="width:260px">
+                    <i-option v-for="(enumValue,index) in vo.enumInfo" :value="enumValue.enumCode">{{ enumValue.enumValue }}</i-option>
+                </i-select>
+            </i-col>
+        </Row>
+    </template>
+    <i-button type="info" @click="cancel">取消</i-button>
+    <i-button type="info" @click="save">保存</i-button>
+    <i-table :columns="columns1" :data="result">
+    </i-table>
 </div>
-<select class="demo" multiple="multiple">
-    <option value="asp">ASP</option>
-    <option value="jsp">JSP</option>
-</select>
-<select class="demo1" multiple="multiple">
-    <option value="asp">ASP</option>
-    <option value="jsp">JSP</option>
-</select>
-<select class="demo2" multiple="multiple">
-    <option value="asp">ASP</option>
-    <option value="jsp">JSP</option>
-</select>
 
-<!--    </div>-->
-    <script src="../../../resources/static/jquery.min.js"></script>
-    <script src="../../../resources/static/fSelect.js"></script>
-    <script>
-        $(function() {
-            $('.demo').fSelect();
-            $('.demo1').fSelect();
-            $('.demo2').fSelect();
-        });
-    </script>
-</div>
+<script>
+    var operatorValueList=new Array()
+    var enumCodeList=new Array()
+    var multipleList=new Array()
+
+    var variableSize=0;
+
+
+    new Vue( {
+            el:"#app",
+            data () {
+                return {
+                    columns1: [
+                        {
+                            title: '条件',
+                            key: 'condition'
+                        },
+                        {
+                            title: '关系',
+                            key: 'relation'
+                        },
+                        {
+                            title: '取值',
+                            key: 'value'
+                        }
+                    ],
+                    condition:[],
+                    result:[],
+                    operatorString:"operator",
+                    enumValueString:"enum",
+                    model7: '',
+                    fieldValue:'',
+                    multiFlag:[false],
+                }
+            },
+            mounted:function () {
+                console.log("mounted")
+                this.getAllCondition()
+            },
+            methods:{
+                getAllCondition:function(){
+                    this.$http.get('http://localhost:8080/data').then(function(res){
+                        console.log(res.data)
+                        this.condition=res.data;
+
+                        variableSize=res.data.length
+                        for (var i=0;i<variableSize;i++){
+                            enumCodeList[i]=new Array()
+                            multipleList[i]=false
+                        }
+                    },function(){
+                        console.log('请求失败处理');
+                    });
+                },
+                //保存条件
+                save:function(){
+                    console.log(operatorValueList)
+                    console.log(enumCodeList)
+                },
+                //重置
+                cancel:function(){
+                    console.log(operatorValueList)
+                    console.log(enumCodeList)
+                },
+                operatorChange:function(v,fieldId,index){
+                    if(v=="in"){
+                        this.multiFlag[index]=true
+                    }
+                    console.log(v)
+                    console.log(fieldId)
+                },
+                prechange:function (v,fieldId) {
+                    console.log(v)
+                    console.log(fieldId)
+                }
+
+
+            }
+        }
+    )
+</script>
 
 </body>
 </html>

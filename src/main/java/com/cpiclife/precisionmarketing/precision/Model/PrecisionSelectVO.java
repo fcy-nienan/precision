@@ -8,10 +8,12 @@ import java.util.List;
 public class PrecisionSelectVO {
     private PrecisionMetaInfo metaInfo;
     private List<PrecisionMetaEnumInfo> enumInfo;
+    private List<String> operators;
 
-    public PrecisionSelectVO(PrecisionMetaInfo metaInfo, List<PrecisionMetaEnumInfo> enumInfo) {
+    public PrecisionSelectVO(PrecisionMetaInfo metaInfo, List<PrecisionMetaEnumInfo> enumInfo, List<String> operators) {
         this.metaInfo = metaInfo;
         this.enumInfo = enumInfo;
+        this.operators = operators;
     }
 
     public PrecisionMetaInfo getMetaInfo() {
@@ -30,23 +32,11 @@ public class PrecisionSelectVO {
         this.enumInfo = enumInfo;
     }
 
-    public static void main(String[] args) throws Exception {
-        System.out.println(makeData());
+    public List<String> getOperators() {
+        return operators;
     }
-    public static List<PrecisionSelectVO> makeData() throws Exception {
-        List<PrecisionSelectVO> result=new ArrayList<>();
-        List<PrecisionMetaInfo> metaInfos=PrecisionMetaInfo.getDefault();
-        List<PrecisionMetaEnumInfo> metaEnumInfos=PrecisionMetaEnumInfo.getDefault();
-        for (PrecisionMetaInfo PrecisionMetaInfo : metaInfos) {
-            List<PrecisionMetaEnumInfo> list=new ArrayList<>();
-            for (PrecisionMetaEnumInfo PrecisionMetaEnumInfo : metaEnumInfos) {
-                if (PrecisionMetaEnumInfo.getFieldId().equals(PrecisionMetaInfo.getFieldId())){
-                    list.add(PrecisionMetaEnumInfo);
-                }
-            }
-            PrecisionSelectVO vo=new PrecisionSelectVO(PrecisionMetaInfo,list);
-            result.add(vo);
-        }
-        return result;
+
+    public void setOperators(List<String> operators) {
+        this.operators = operators;
     }
 }
