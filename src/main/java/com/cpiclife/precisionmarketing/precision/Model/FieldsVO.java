@@ -1,37 +1,55 @@
 package com.cpiclife.precisionmarketing.precision.Model;
 
 import javax.persistence.*;
+import java.util.List;
 
-@Entity(name="fields")
-public class PrecisionDescartesFields {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class FieldsVO {
     private Long id;
-    @Column
     private Long taskId;
-    @Column
     private Long times;
-    @Column
     private String fieldCode;
-    @Column
     private String fieldType;
-    @Column
     private String fieldName;
-    @Column
     private String fieldId;
-    @Column
     private String comparisonOperator;
-    @Column
     private String fieldCstrValue;
-    @Column
     private String variableType;
-    @Column
-    private String enumCode;
+    private List<Object> enumCode;
 
-    public PrecisionDescartesFields() {
+    public FieldsVO() {
     }
-
-    public PrecisionDescartesFields(Long id, Long taskId, Long times, String fieldCode, String fieldType, String fieldName, String fieldId, String comparisonOperator, String fieldCstrValue, String variableType, String enumCode) {
+    public static PrecisionDescartesFields transfer(FieldsVO vo){
+        PrecisionDescartesFields fields=new PrecisionDescartesFields();
+        fields.setId(vo.id);
+        fields.setTaskId(vo.taskId);
+        fields.setTimes(vo.times);
+        fields.setFieldCstrValue(vo.fieldCstrValue);
+        fields.setFieldCode(vo.fieldCode);
+        fields.setFieldType(vo.fieldType);
+        fields.setFieldName(vo.fieldName);
+        fields.setFieldId(vo.fieldId);
+        fields.setComparisonOperator(vo.comparisonOperator);
+        fields.setVariableType(vo.variableType);
+        List<Object> en=vo.getEnumCode();
+        if (en.size()==1){
+            fields.setEnumCode(en.get(0).toString());
+        }else{
+            StringBuilder builder=new StringBuilder();
+            if (vo.comparisonOperator.equals("in")){
+                builder.append("(");
+            }
+            for (int i=0;i<en.size();i++){
+                builder.append(en.get(i)).append(",");
+            }
+            builder.deleteCharAt(builder.length()-1);
+            if (vo.comparisonOperator.equals("in")){
+                builder.append("(");
+            }
+            fields.setEnumCode(builder.toString());
+        }
+        return fields;
+    }
+    public FieldsVO(Long id, Long taskId, Long times, String fieldCode, String fieldType, String fieldName, String fieldId, String comparisonOperator, String fieldCstrValue, String variableType, List<Object> enumCode) {
         this.id = id;
         this.taskId = taskId;
         this.times = times;
@@ -125,11 +143,11 @@ public class PrecisionDescartesFields {
         this.variableType = variableType;
     }
 
-    public String getEnumCode() {
+    public List<Object> getEnumCode() {
         return enumCode;
     }
 
-    public void setEnumCode(String enumCode) {
+    public void setEnumCode(List<Object> enumCode) {
         this.enumCode = enumCode;
     }
 }

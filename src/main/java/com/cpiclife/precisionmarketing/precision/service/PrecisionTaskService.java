@@ -32,6 +32,13 @@ public class PrecisionTaskService {
         taskMapper.save(task);
 
     }
+    public List<PrecisionTask> getUserAllVisibleTask(String userId,String company,Long pageIndex,Long pageSize){
+        List<PrecisionTask> byCompany=taskMapper.findByCompany(company);
+        for (int i=0;i<byCompany.size();i++){
+            byCompany.get(i).updateStatusName();
+        }
+        return byCompany;
+    }
     public Page getData(String userId,String company,int pageIndex,int pageSize){
         List<PrecisionTask> byCompany = taskMapper.findByCompany(company);
 

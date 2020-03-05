@@ -10,8 +10,8 @@ import java.util.List;
 
 public interface FieldsMapper extends JpaRepository<PrecisionDescartesFields,Long> {
     @Query(nativeQuery = true,
-            value = "select max(times) from precision_descartes_fields where taskId=:taskId")
-    public int getMax(@Param("taskId") Long taskId);
+            value = "select max(times) from fields where task_id=:taskId")
+    public Long getMax(@Param("taskId") Long taskId);
     public List<PrecisionDescartesFields> findByTaskId(long taskId);
     public List<PrecisionDescartesFields> findByTaskIdAndTimes(long taskId,long times);
 }

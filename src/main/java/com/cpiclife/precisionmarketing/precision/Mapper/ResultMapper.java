@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface ResultMapper extends JpaRepository<PrecisionResult,Long> {
     @Query(nativeQuery = true,
-            value = "select max(times) from precision_result")
+            value = "select max(times) from result where user_id=:userId")
     public int getMax(@Param("userId") Long userId);
     public List<PrecisionResult> findByTaskId(long taskId);
 

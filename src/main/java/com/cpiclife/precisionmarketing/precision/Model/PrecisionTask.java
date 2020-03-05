@@ -20,6 +20,7 @@ public class PrecisionTask {
     private Long taskId;
     @Column
     private Long status;
+    private String statusName;
     @Column
     private String userId;
     @Column
@@ -31,6 +32,24 @@ public class PrecisionTask {
 
     public PrecisionTask( ) {
 
+    }
+    private static String[] statusNames=new String[]{
+            "已取消",//0
+            "盘点中",//1
+            "盘点完成",//2
+            "抽样中",//3
+            "开始上载"//4
+    } ;
+    public void updateStatusName(){
+        statusName=statusNames[status.intValue()];
+    }
+
+    public String getStatusName() {
+        return statusName;
+    }
+
+    public void setStatusName(String statusName) {
+        this.statusName = statusName;
     }
 
     public PrecisionTask(Long id, Long precisionId, Long taskId, Long status, String userId, String company, Date insertDate, Date lastModified) {

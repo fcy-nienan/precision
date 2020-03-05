@@ -6,6 +6,9 @@ import com.cpiclife.precisionmarketing.precision.Model.*;
 import com.cpiclife.precisionmarketing.precision.service.PrecisionDescartesFieldsService;
 import com.cpiclife.precisionmarketing.precision.service.PrecisionMetaInfoService;
 import com.cpiclife.precisionmarketing.precision.service.PrecisionTaskService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -33,7 +37,6 @@ public class Hello {
     private ResultMapper resultMapper;
     @Autowired
     private TaskMapper taskMapper;
-
     @Autowired
     private PrecisionMetaInfoService infoService;
     @Autowired
@@ -49,68 +52,74 @@ public class Hello {
         return "task";
     }
 
-    @RequestMapping("/data")
+    @RequestMapping("/condition")
     @ResponseBody
     public List<PrecisionSelectVO> data() throws Exception {
         System.out.println(infoService.getCanSelectCondition());
         return infoService.getCanSelectCondition();
     }
-    private static HashMap<String,String> map=new HashMap();
-    @RequestMapping("/save")
-    @ResponseBody
-    public String save(@RequestParam("value")String jsonString,@RequestParam("userId")String userId,
-                       @RequestParam("taskId")String taskId)throws Exception {
-        map.put(userId+":"+taskId,jsonString);
-        System.out.println(userId+":"+taskId+"----"+jsonString);
-        return "success";
-    }
-    @RequestMapping("/selectedCondition")
-    @ResponseBody
-    public String selectedCondition(@RequestParam("userId")String userId,
-                                    @RequestParam("taskId")String taskId)throws Exception{
-        String str=userId+":"+taskId;
-        System.out.println(userId+":"+taskId);
-        return map.get(str);
-    }
-    //取消盘点
-    @RequestMapping("/cancel")
-    @ResponseBody
-    public String cancelCount(@RequestParam("userId")String userId,
-                              @RequestParam("taskId")String taskId)throws Exception{
-        return "success";
-    }
     //开始盘点
     @RequestMapping("/startCount")
     @ResponseBody
     public String startCount(@RequestParam("userId")String userId,
-                             @RequestParam("taskId")String taskId)throws Exception{
+                             @RequestParam("precisionId")String precisionId,
+                             @RequestParam("value")String value,
+                             @RequestParam("company")String company)throws Exception{
+        if (userId==null||precisionId==null||company==null){
+            return "failed";
+        }
+        System.out.println("开始盘点任务:"+userId+":"+precisionId+":"+company+":"+value);
 
-        taskMapper.updateStatus(Long.parseLong(userId),
-                Long.parseLong((taskId)),
-                0l);
-        System.out.println("开始盘点任务:"+userId+":"+taskId);
-//        保存盘点任务
-//        修改盘点状态
-//        修改任务状态
+        PrecisionTask task=new PrecisionTask();
+        task.setUserId(userId);
+        task.setCompany(company);
+        task.setPrecisionId(Long.parseLong(precisionId));
+        task.setStatus(1l);
+        task.setInsertDate(new Date());
+        task.setLastModified(new Date());
+        task=taskMapper.save(task);
+        task.setTaskId(task.getId());
+        taskMapper.save(task);
+        ObjectMapper mapper=new ObjectMapper();
+        System.out.println("创建盘点任务:"+task);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        List<PrecisionDescartesFields> vo=mapper.readValue(value, new TypeReference<List<PrecisionDescartesFields>>() {});
+//        System.out.println("条件:"+vo);
+//        List<PrecisionDescartesFields> descartesFields=new ArrayList<>();
+//        for (FieldsVO fieldsVO : vo) {
+//            descartesFields.add(FieldsVO.transfer(fieldsVO));
+//        }
+//        System.out.println("转换后的条件:"+descartesFields);
+        try {
+            fieldsService.save(vo,task.getId());
+        }catch (Exception e){
+            return "failed";
+        }
         return "success";
+    }
+
+    public static void main(String[] args) {
+        String s="[{\"fieldCode\":\"subCompany\",\"operator\":\"=\",\"enumValue\":\"10294\"},{\"fieldCode\":\"supCompany\",\"operator\":\"in\",\"enumValue\":[\"94389\"]},{\"fieldCode\":\"sex\",\"operator\":\"=\",\"enumValue\":\"0\"}]";
+
     }
 
 
     //获取用户所有可见的任务
     @RequestMapping("/getAllTask")
     @ResponseBody
-    public Page getAllTask(@RequestParam("userId")String userId,
+    public List<PrecisionTask> getAllTask(@RequestParam("userId")String userId,
                                           @RequestParam("company")String company,
                                           @RequestParam("pageIndex")String pageIndex,
                                           @RequestParam("pageSize")String pageSize)throws Exception {
         System.out.println("getAllTask:"+userId+":"+pageIndex+":"+pageSize);
-        return taskService.getData(userId,company,
-                Integer.parseInt(pageIndex),
-                Integer.parseInt(pageSize));
+        return taskService.getUserAllVisibleTask(userId,company,Long.parseLong(pageIndex),
+                Long.parseLong(pageSize));
     }
     @RequestMapping("/getLastestCondition")
     @ResponseBody
-    public List<PrecisionDescartesFields> getLastestCondition(@RequestParam("taskId")String taskId){
+    public List<PrecisionDescartesFields> getLastestCondition(
+            @RequestParam("taskId")String taskId){
+
         return fieldsService.queryMaxCondition(Long.parseLong(taskId));
     }
 }
