@@ -2,18 +2,26 @@ package com.cpiclife.precisionmarketing.precision.Model;
 
 import lombok.ToString;
 
+import javax.persistence.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-@ToString
+@Entity(name="metainfo")
 public class PrecisionMetaInfo {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column
     private Long fieldId;
+    @Column
     private String fieldCode;
+    @Column
     private String fieldName;
+    @Column
     private String fieldType;
+    @Column
     private String supportOperators;
 
     public static List<PrecisionMetaInfo> getDefault()throws Exception{

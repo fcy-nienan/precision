@@ -1,15 +1,29 @@
 package com.cpiclife.precisionmarketing.precision.Model;
 
+import javax.persistence.*;
+
+@Entity(name="result")
 public class PrecisionResult {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column
     private Long taskId;
+    @Column
     private Long times;
+    @Column
     private Long resultId;
+    @Column
     private Long amount;
+    @Column
     private Long usedAmount;
+    @Column
     private String precent;
+    @Column
     private Long selected;
+    @Column
     private String descartesfields;
+    @Column
     private String guestGroupName;
 
     public PrecisionResult(Long id, Long taskId, Long times, Long resultId, Long amount, Long usedAmount, String precent, Long selected, String descartesfields, String guestGroupName) {

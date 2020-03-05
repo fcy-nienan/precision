@@ -1,16 +1,48 @@
 package com.cpiclife.precisionmarketing.precision.Model;
 
+import javax.persistence.*;
 import java.util.Date;
-
+@Entity(name="task")
 public class PrecisionTask {
+    /*
+    * 进来就是一个任务
+    * 待盘点  可选条件，
+    * 盘点中  不可选条件
+    * 盘点完成 可选条件
+    *
+    * */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column
     private Long precisionId;
+    @Column
     private Long taskId;
+    @Column
     private Long status;
+    @Column
     private String userId;
+    @Column
     private String company;
-    private Date insertMane;
+    @Column
+    private Date insertDate;
+    @Column
     private Date lastModified;
+
+    public PrecisionTask( ) {
+
+    }
+
+    public PrecisionTask(Long id, Long precisionId, Long taskId, Long status, String userId, String company, Date insertDate, Date lastModified) {
+        this.id = id;
+        this.precisionId = precisionId;
+        this.taskId = taskId;
+        this.status = status;
+        this.userId = userId;
+        this.company = company;
+        this.insertDate = insertDate;
+        this.lastModified = lastModified;
+    }
 
     public Long getId() {
         return id;
@@ -60,12 +92,12 @@ public class PrecisionTask {
         this.company = company;
     }
 
-    public Date getInsertMane() {
-        return insertMane;
+    public Date getInsertDate() {
+        return insertDate;
     }
 
-    public void setInsertMane(Date insertMane) {
-        this.insertMane = insertMane;
+    public void setInsertDate(Date insertDate) {
+        this.insertDate = insertDate;
     }
 
     public Date getLastModified() {

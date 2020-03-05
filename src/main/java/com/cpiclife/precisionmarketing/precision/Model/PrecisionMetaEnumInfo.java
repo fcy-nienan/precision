@@ -2,21 +2,22 @@ package com.cpiclife.precisionmarketing.precision.Model;
 
 import lombok.ToString;
 
+import javax.persistence.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-@ToString
+@Entity(name="enuminfo")
 public class PrecisionMetaEnumInfo {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column
     private String enumValue;
+    @Column
     private Long fieldId;
+    @Column
     private String enumCode;
-
-    public static void main(String[] args) throws Exception {
-        System.out.println(getDefault().size());
-        System.out.println(getDefault());
-    }
     public static List<PrecisionMetaEnumInfo> getDefault()throws Exception{
         BufferedReader reader=new BufferedReader(new InputStreamReader((PrecisionMetaEnumInfo.class.getResourceAsStream("/MetaEnumInfo.txt"))));
         String msg="";

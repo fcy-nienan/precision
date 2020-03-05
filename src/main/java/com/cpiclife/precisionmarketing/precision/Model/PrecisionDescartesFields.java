@@ -1,16 +1,31 @@
 package com.cpiclife.precisionmarketing.precision.Model;
 
+import javax.persistence.*;
+
+@Entity(name="fields")
 public class PrecisionDescartesFields {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column
     private Long taskId;
+    @Column
     private Long times;
+    @Column
     private String fieldCode;
+    @Column
     private String fieldType;
+    @Column
     private String fieldName;
+    @Column
     private String fieldId;
+    @Column
     private String comparisonOperator;
+    @Column
     private String fieldCstrValue;
+    @Column
     private String variableType;
+    @Column
     private String enumCode;
 
     public PrecisionDescartesFields(Long id, Long taskId, Long times, String fieldCode, String fieldType, String fieldName, String fieldId, String comparisonOperator, String fieldCstrValue, String variableType, String enumCode) {
