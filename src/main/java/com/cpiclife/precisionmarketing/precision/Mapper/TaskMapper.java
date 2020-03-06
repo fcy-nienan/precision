@@ -15,6 +15,8 @@ public interface TaskMapper extends JpaRepository<PrecisionTask,Long> {
     @Modifying
     @Query("update task set status=:status where taskId=:taskId and userId=:userId")
     void updateStatus(@Param("userId")Long userId, @Param("taskId")Long taskId,@Param("status")Long status);
-
+    public List<PrecisionTask> findByTaskId(long taskId);
+    List<PrecisionTask> findByStatus(long status);
+    List<PrecisionTask> findByPrecisionId(long precisionId);
 
 }

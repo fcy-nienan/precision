@@ -23,8 +23,13 @@ public class PrecisionResult {
     private Long selected;
     @Column
     private String descartesfields;
+    private String fieldsName;
     @Column
     private String guestGroupName;
+
+    public PrecisionResult() {
+
+    }
 
     public PrecisionResult(Long id, Long taskId, Long times, Long resultId, Long amount, Long usedAmount, String precent, Long selected, String descartesfields, String guestGroupName) {
         this.id = id;
@@ -117,5 +122,13 @@ public class PrecisionResult {
 
     public void setGuestGroupName(String guestGroupName) {
         this.guestGroupName = guestGroupName;
+    }
+
+    public String getFieldsName() {
+        return fieldsName;
+    }
+
+    public void setFieldsName(String fieldsName) {
+        this.fieldsName = fieldsName;
     }
 }

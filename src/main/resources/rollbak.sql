@@ -4,3 +4,5 @@ drop table precision_meta_enum_info;
 drop table precision_meta_info;
 drop table precision_result;
 drop table precision_task;
+
+select * from fields;

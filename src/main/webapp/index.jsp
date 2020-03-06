@@ -146,7 +146,12 @@
         methods: {
             queryInfo(row,index){
                 var taskId=row.taskId
-                location.href='http://localhost:8080/task.jsp?taskId='+taskId;
+                var status=row.status
+                var precisionId=this.precisionId;
+                var company=this.company;
+                var userId=this.userId;
+                console.log(this.userId)
+                location.href='http://localhost:8080/task.jsp?taskId='+taskId+'&status='+status+'&precisionId='+precisionId+'&company='+company+'&userId='+userId;
             },
             getAllTask:function () {
                 this.$http.post(
@@ -160,7 +165,14 @@
                     {emulateJSON:true}
                 ).then(function (res) {
                         this.$Message.success("获取用户所有可视任务成功!")
+                        console.log(res.data)
                         this.taskList=res.data;
+                        for(var i=0;i<this.taskList.length;i++){
+                            // console.log(dateFtt('yyyy-mm-dd',this.taskList[i].insertDate))
+                            this.taskList[i].insertDate=dateFtt('yyyy-MM-dd hh-mm',new Date(this.taskList[i].insertDate))
+                            this.taskList[i].lastModified=dateFtt('yyyy-MM-dd hh-mm',new Date(this.taskList[i].lastModified))
+                        }
+                        console.log(this.taskList)
                     },function (e) {
                         this.$Message.error("网络错误或者系统出错!"+e.toString())
                     })
@@ -199,9 +211,11 @@
                     {emulateJSON: true}
                 ).then(function (res) {
                     console.log(res)
-                    if(res.status==200) {
+                    if(res.data.code=='success'){
                         this.$Message.success("创建盘点任务成功!")
                         location.href = 'http://localhost:8080/index.jsp?userId='+this.userId+'&precisionId='+this.precisionId+'&company='+this.company;
+                    }else if  (res.data.code='existed'){
+                        this.$Message.warning("请重新退出并进入!")
                     }else{
                         this.$Message.error("创建盘点任务失败!")
                     }
@@ -275,6 +289,24 @@
             }
         },
     })
+    function dateFtt(fmt,date)
+    { //author: meizz
+        var o = {
+            "M+" : date.getMonth()+1,                 //月份
+            "d+" : date.getDate(),                    //日
+            "h+" : date.getHours(),                   //小时
+            "m+" : date.getMinutes(),                 //分
+            "s+" : date.getSeconds(),                 //秒
+            "q+" : Math.floor((date.getMonth()+3)/3), //季度
+            "S"  : date.getMilliseconds()             //毫秒
+        };
+        if(/(y+)/.test(fmt))
+            fmt=fmt.replace(RegExp.$1, (date.getFullYear()+"").substr(4 - RegExp.$1.length));
+        for(var k in o)
+            if(new RegExp("("+ k +")").test(fmt))
+                fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+        return fmt;
+    }
 </script>
 
 </body>
