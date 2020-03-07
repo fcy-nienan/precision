@@ -33,16 +33,6 @@ public class PrecisionTask {
     public PrecisionTask( ) {
 
     }
-    private static String[] statusNames=new String[]{
-            "已取消",//0
-            "盘点中",//1
-            "盘点完成",//2
-            "抽样中",//3
-            "开始上载"//4
-    } ;
-    public void updateStatusName(){
-        statusName=statusNames[status.intValue()];
-    }
 
     public String getStatusName() {
         return statusName;

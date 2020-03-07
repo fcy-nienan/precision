@@ -18,7 +18,7 @@ import java.util.List;
 public class PrecisionResultService {
     @Autowired
     private ResultMapper resultMapper;
-    public List<PrecisionResult> getLastestResult(Long taskId){
+    public List<PrecisionResult> getLatestResult(Long taskId){
         List<PrecisionResult> results=new ArrayList<>();
         Integer max=resultMapper.getMax(taskId);
         if (max==null){

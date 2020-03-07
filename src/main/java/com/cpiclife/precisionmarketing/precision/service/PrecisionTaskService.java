@@ -1,9 +1,10 @@
 package com.cpiclife.precisionmarketing.precision.service;
 
 import com.cpiclife.precisionmarketing.precision.Mapper.TaskMapper;
-import com.cpiclife.precisionmarketing.precision.Model.Page;
 import com.cpiclife.precisionmarketing.precision.Model.PrecisionTask;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -32,28 +33,17 @@ public class PrecisionTaskService {
         taskMapper.save(task);
 
     }
-    public List<PrecisionTask> getUserAllVisibleTask(String userId,String company,Long pageIndex,Long pageSize){
-        List<PrecisionTask> byCompany=taskMapper.findByCompany(company);
-        for (int i=0;i<byCompany.size();i++){
-            byCompany.get(i).updateStatusName();
-        }
-        return byCompany;
+    public Page getUserAllVisibleTask(String userId,String company,Long pageIndex,Long pageSize){
+//        List<PrecisionTask> byCompany=taskMapper.findByCompany(company);
+//        return byCompany;
+        Page userCanVisible = taskMapper.findUserCanVisible(company, PageRequest.of(pageIndex.intValue(), pageSize.intValue()));
+        return userCanVisible;
     }
-    public Page getData(String userId,String company,int pageIndex,int pageSize){
-        List<PrecisionTask> byCompany = taskMapper.findByCompany(company);
-
-        List<PrecisionTask> result=new ArrayList<>();
-        int startIndex=(pageIndex-1)*pageSize;
-        int j=0;
-        for (int i=0;i<byCompany.size();i++){
-            PrecisionTask task = byCompany.get(i);
-            if (task.getUserId().equals(userId)&&task.getCompany().equals(company)){
-                j++;
-                if(j>=startIndex) {
-                    result.add(task);
-                }
-            }
+    public boolean checkTaskValid(long taskId,String userId){
+        List<PrecisionTask> precisionTasks=taskMapper.findByTaskIdAndUserId(taskId,userId);
+        if (precisionTasks!=null&&precisionTasks.size()!=0){
+            return true;
         }
-        return new Page(byCompany.size(),pageIndex,pageSize,result);
+        return false;
     }
 }

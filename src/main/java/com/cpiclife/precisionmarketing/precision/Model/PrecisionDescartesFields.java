@@ -26,7 +26,7 @@ public class PrecisionDescartesFields {
     @Column
     private String variableType;
     @Column
-    private String enumCode;
+    private String enumCode;//该条件的枚举值的英文
 
     public PrecisionDescartesFields() {
     }

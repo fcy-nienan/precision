@@ -30,7 +30,8 @@ public class PrecisionDescartesFieldsService {
     }
     public List<PrecisionDescartesFields> queryMaxCondition(long taskId){
         long max=getMax(taskId);
-        return fieldsMapper.findByTaskIdAndTimes(taskId,max);
+        List<PrecisionDescartesFields> byTaskIdAndTimes = fieldsMapper.findByTaskIdAndTimes(taskId, max);
+        return byTaskIdAndTimes;
     }
 
     public void save(PrecisionDescartesFields fields){

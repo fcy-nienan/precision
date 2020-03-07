@@ -22,8 +22,8 @@ public class PrecisionResult {
     @Column
     private Long selected;
     @Column
-    private String descartesfields;
-    private String fieldsName;
+    private String descartesfields;//限制条件的英文值
+    private String fieldsName;//限制条件的中文值
     @Column
     private String guestGroupName;
 
