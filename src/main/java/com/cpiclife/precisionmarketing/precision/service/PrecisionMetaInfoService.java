@@ -13,6 +13,7 @@ import java.util.List;
  */
 @Component("precisionMetaInfoService")
 public class PrecisionMetaInfoService {
+//    获取所有可选的条件
     public List<PrecisionSelectVO> getCanSelectCondition() throws Exception {
         List<PrecisionSelectVO> result=new ArrayList<>();
         List<PrecisionMetaInfo> metaInfos=PrecisionMetaInfo.getDefault();
@@ -36,9 +37,5 @@ public class PrecisionMetaInfoService {
             result.add(s);
         }
         return result;
-    }
-
-    public static void main(String[] args) throws Exception {
-        System.out.println(new PrecisionMetaInfoService().getCanSelectCondition());
     }
 }

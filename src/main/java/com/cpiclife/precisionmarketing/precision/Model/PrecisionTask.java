@@ -4,13 +4,6 @@ import javax.persistence.*;
 import java.util.Date;
 @Entity(name="task")
 public class PrecisionTask {
-    /*
-    * 进来就是一个任务
-    * 待盘点  可选条件，
-    * 盘点中  不可选条件
-    * 盘点完成 可选条件
-    *
-    * */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

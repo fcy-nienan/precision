@@ -43,7 +43,7 @@
         <div style="width:100%;text-align:center;height:250px;overflow:scroll;">
             <template v-for="(vo,index) in condition">
                 <Row>
-                    <i-col span="6">
+                    <i-col span="8">
                         {{ vo.metaInfo.fieldName }}
                     </i-col>
                     <i-col span="6">
@@ -51,7 +51,7 @@
                             <i-option v-for="(operator,index) in vo.operators" :value="operator">{{ operator }}</i-option>
                         </i-select>
                     </i-col>
-                    <i-col span="10">
+                    <i-col span="6">
                         <i-select  filterable @on-change="changeValue($event,vo.metaInfo.fieldCode,vo.metaInfo.fieldId,vo.metaInfo.fieldName,vo.metaInfo.fieldType,index)"  :multiple="multiFlag[index]" placeholder="枚举值" style="width:260px">
                             <i-option v-for="(enumValue,index) in vo.enumInfo" :value="enumValue.enumCode">{{ enumValue.enumValue }}</i-option>
                         </i-select>
@@ -70,6 +70,7 @@
     <i-table stripe border height="200" :columns="selectTableHeader" :data="showValue" :no-data-text="noDataShow"></i-table>
 </div>
 <script>
+    var baseUrl='http://localhost:8080/';
     var vue=new Vue({
         el:"#div",
         data(){
@@ -216,11 +217,11 @@
                 var company=this.company;
                 var userId=this.userId;
                 console.log(this.userId)
-                location.href='http://localhost:8080/task.jsp?taskId='+taskId+'&status='+status+'&precisionId='+precisionId+'&company='+company+'&userId='+userId;
+                location.href=baseUrl+'task.jsp?taskId='+taskId+'&status='+status+'&precisionId='+precisionId+'&company='+company+'&userId='+userId;
             },
             getAllTask:function () {
                 this.$http.post(
-                    'http://localhost:8080/precision.do',
+                    baseUrl+'precision.do',
                     {
                         'type':'getAllTask',
                         "userId":this.userId,
@@ -275,7 +276,7 @@
                     return;
                 }
                 this.$http.post(
-                    'http://localhost:8080/precision.do',
+                    baseUrl+'precision.do',
                     {
                         'type':'startCount',
                         "value": str,
@@ -288,7 +289,7 @@
                     console.log(res)
                     this.info(res.data)
                     if(res.data.code==200){
-                        location.href = 'http://localhost:8080/index.jsp?userId='+this.userId+'&precisionId='+this.precisionId+'&company='+this.company;
+                        location.href = baseUrl+'index.jsp?userId='+this.userId+'&precisionId='+this.precisionId+'&company='+this.company;
                     }
                 },function () {
                     this.$Message.error("创建盘点请求失败!")
@@ -318,7 +319,7 @@
                 }
             },
             getAllCondition:function(){
-                this.$http.get('http://localhost:8080/precision.do?type=condition').then(function(res){
+                this.$http.get(baseUrl+'precision.do?type=condition').then(function(res){
                     this.info(res.data)
                     if(res.data.code==200){
                         this.condition=res.data.data;

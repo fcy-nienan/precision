@@ -70,6 +70,7 @@
     </i-table>
 </div>
 <script>
+    var baseUrl='http://localhost:8080/'
     var vue=new Vue({
         el:"#task",
         data(){
@@ -247,7 +248,7 @@
                     return;
                 }
                 console.log(str)
-                this.$http.post('http://localhost:8080/precision.do',{
+                this.$http.post(baseUrl+'precision.do',{
                     'type':'startSample',
                     'value':str,
                     'taskId':this.taskId,
@@ -262,7 +263,7 @@
                 });
             },
             getAllResult:function(){
-                this.$http.get('http://localhost:8080/precision.do?type=getAllResult&taskId='+this.taskId)
+                this.$http.get(baseUrl+'/precision.do?type=getAllResult&taskId='+this.taskId)
                     .then(function (res) {
                         // this.info(res.data)
                         if(res.data.code==200){
@@ -273,7 +274,7 @@
                     })
             },
             back:function(){
-                location.href = 'http://localhost:8080/index.jsp?userId='+this.userId+'&precisionId='+this.precisionId+'&company='+this.company;
+                location.href = baseUrl+'/index.jsp?userId='+this.userId+'&precisionId='+this.precisionId+'&company='+this.company;
             },
             flushCondition:function(){
                 var x=new Array();
@@ -305,7 +306,7 @@
                 });
             },
             getCurrentTask:function(){
-                this.$http.get('http://localhost:8080/precision.do?type=getCurrentTask&taskId='+this.taskId)
+                this.$http.get(baseUrl+'/precision.do?type=getCurrentTask&taskId='+this.taskId)
                     .then(function (res) {
                         // this.info(res.data)
                         if(res.data.code==200) {
@@ -388,7 +389,7 @@
                 }
                 var taskId=this.taskId
                 this.$http.post(
-                    'http://localhost:8080/precision.do', {
+                    baseUrl+'precision.do', {
                         'type':'updateCount',
                         "value": str,
                         "taskId":taskId
@@ -403,10 +404,10 @@
                 });
             },
             flushPage:function(){
-                location.href = 'http://localhost:8080/index.jsp?userId='+this.userId+'&precisionId='+this.precisionId+'&company='+this.company;
+                location.href = baseUrl+'index.jsp?userId='+this.userId+'&precisionId='+this.precisionId+'&company='+this.company;
             },
             getAllSelected:function(){
-                this.$http.get('http://localhost:8080/precision.do?type=getLatestCondition&taskId='+this.taskId)
+                this.$http.get(baseUrl+'precision.do?type=getLatestCondition&taskId='+this.taskId)
                     .then(function(res){
                         // this.info(res.data)
                         if(res.data.code=='200'){
@@ -418,7 +419,7 @@
                     });
             },
             getAllCondition:function(){
-                this.$http.get('http://localhost:8080/precision.do?type=condition').then(function(res){
+                this.$http.get(baseUrl+'precision.do?type=condition').then(function(res){
                     // this.info(res.data);
                     if(res.data.code==200){
                         this.condition=res.data.data;

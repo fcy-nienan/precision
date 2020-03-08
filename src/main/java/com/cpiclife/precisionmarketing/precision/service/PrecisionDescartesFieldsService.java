@@ -25,20 +25,20 @@ public class PrecisionDescartesFieldsService {
     private MetaMapper metaMapper;
     @Autowired
     private EnumMapper enumMapper;
+//    获取改任务号的最大的times(每盘点一次times加一)
     public long getMax(long taskId){
         return fieldsMapper.getMax(taskId);
     }
+//    查询改任务号的最近的盘点条件
     public List<PrecisionDescartesFields> queryMaxCondition(long taskId){
         long max=getMax(taskId);
         List<PrecisionDescartesFields> byTaskIdAndTimes = fieldsMapper.findByTaskIdAndTimes(taskId, max);
         return byTaskIdAndTimes;
     }
-
-    public void save(PrecisionDescartesFields fields){
-        fieldsMapper.save(fields);
-    }
+//    保存改任务号的盘点条件
     public void save(List<PrecisionDescartesFields> vo,long taskId){
         long times=1;
+//        第一次可能没有值,其他都是times+1
         try {
             Long max = fieldsMapper.getMax(taskId);
             times=max+1;

@@ -30,16 +30,6 @@ import static com.cpiclife.precisionmarketing.precision.Model.TaskEnum.WAIT_SAMP
 @Component("methodInvocation")
 public class MethodInvocation {
     @Autowired
-    private EnumMapper enumMapper;
-    @Autowired
-    private FieldsMapper fieldsMapper;
-    @Autowired
-    private MetaMapper metaMapper;
-    @Autowired
-    private ResultMapper resultMapper;
-    @Autowired
-    private TaskMapper taskMapper;
-    @Autowired
     private PrecisionMetaInfoService infoService;
     @Autowired
     private PrecisionTaskService taskService;
@@ -52,10 +42,8 @@ public class MethodInvocation {
     public static class methodWrapper{
         public String[] params;
         public String method;
-
         public methodWrapper() {
         }
-
         public methodWrapper(String method, String[] params){
             this.method=method;
             this.params=params;
@@ -70,9 +58,6 @@ public class MethodInvocation {
     }
     public static methodWrapper getInvoke(String type){
         return methodMap.get(type);
-    }
-    public static void main(String[] args) {
-        System.out.println("".split(",").length);
     }
 //    第一个参数前端请求的类型,第二个参数调用的方法,后面的通过逗号分隔的就是请求的参数(全是string),然后是换行符
 //    请求参数必须有序,要不然会出错
@@ -123,19 +108,25 @@ public class MethodInvocation {
             e.printStackTrace();
         }
     }
+
+
+//    获取所有可选的条件
     public ResponseVO condition() throws Exception {
         System.out.println(infoService.getCanSelectCondition());
         return ResponseVO.success().data(infoService.getCanSelectCondition()).msg("获取所有可选条件成功!");
     }
+//    手动盘点完成
     public ResponseVO countFinished(){
         task.CountFinished();
         return ResponseVO.success().msg("盘点完成!");
     }
+//    检测用户和任务是否关联
     public ResponseVO checkTaskValid(String taskId,
                                      String userId){
         System.out.println("检测用户id和任务id");
         return ResponseVO.success().data(taskService.checkTaskValid(Long.parseLong(taskId), userId));
     }
+//    开始抽样
     public ResponseVO startSample(String value,
                                   String taskId,
                                   String userId)throws Exception{
@@ -143,9 +134,9 @@ public class MethodInvocation {
         System.out.println(taskId+":"+userId);
         if (taskService.checkTaskValid(Long.parseLong(taskId),userId)){
 //            更新任务状态
-            List<PrecisionTask> byTaskId = taskMapper.findByTaskId(Long.parseLong(taskId));
+            List<PrecisionTask> byTaskId = taskService.findByTaskId(Long.parseLong(taskId));
             byTaskId.get(0).setStatus(WAIT_SAMPLE.index());
-            taskMapper.save(byTaskId.get(0));
+            taskService.save(byTaskId.get(0));
 
             ObjectMapper mapper=new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -153,13 +144,14 @@ public class MethodInvocation {
             for (int i=0;i<precisionResults.size();i++){
                 PrecisionResult result = precisionResults.get(i);
                 result.setSelected(1l);
-                resultMapper.save(result);
+                resultService.save(result);
             }
             return ResponseVO.success().msg("抽样中,等待后台处理!");
         }else{
             return ResponseVO.error().msg("抽样失败,不合法的任务号!");
         }
     }
+//    重新盘点
     public ResponseVO updateCount(String value,
                                   String taskId) throws JsonProcessingException {
         if (taskId==null||value==null){
@@ -167,14 +159,14 @@ public class MethodInvocation {
         }
         System.out.println("更新盘点任务:"+taskId+":"+":"+":"+value);
 
-        List<PrecisionTask> taskList=taskMapper.findByTaskId(Long.parseLong(taskId));
+        List<PrecisionTask> taskList=taskService.findByTaskId(Long.parseLong(taskId));
         if (taskList==null||taskList.size()==0){
             return ResponseVO.error().msg("不存在的任务号!");
         }
         PrecisionTask task=taskList.get(0);
         task.setStatus(WAIT_COUNT.index());
         task.setLastModified(new Date());
-        task=taskMapper.save(task);
+        task=taskService.save(task);
         ObjectMapper mapper=new ObjectMapper();
         System.out.println("重新盘点:"+task);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -186,6 +178,7 @@ public class MethodInvocation {
         }
         return ResponseVO.success().msg("新盘点任务提交成功!");
     }
+//    创建盘点
     public ResponseVO startCount(String userId,
                                  String precisionId,
                                  String value,
@@ -195,7 +188,7 @@ public class MethodInvocation {
         }
         System.out.println("开始盘点任务:"+userId+":"+precisionId+":"+company+":"+value);
 
-        List<PrecisionTask> existsTask=taskMapper.findByPrecisionId(Long.parseLong(precisionId));
+        List<PrecisionTask> existsTask=taskService.findByPrecisionId(Long.parseLong(precisionId));
         if (existsTask != null && existsTask.size() != 0) {
             return ResponseVO.error().msg("请从其他系统重新进入并盘点!");
         }
@@ -207,9 +200,9 @@ public class MethodInvocation {
         task.setStatus(WAIT_COUNT.index());
         task.setInsertDate(new Date());
         task.setLastModified(new Date());
-        task=taskMapper.save(task);
+        task=taskService.save(task);
         task.setTaskId(task.getId());
-        taskMapper.save(task);
+        taskService.save(task);
         ObjectMapper mapper=new ObjectMapper();
         System.out.println("创建盘点任务:"+task);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -221,6 +214,7 @@ public class MethodInvocation {
         }
         return ResponseVO.success().msg("提交盘点任务成功!");
     }
+//    获取盘点结果
     public ResponseVO getAllResult(String taskId){
         List<PrecisionResult> LatestResult = resultService.getLatestResult(Long.parseLong(taskId));
         for (PrecisionResult precisionResult : LatestResult) {
@@ -228,14 +222,15 @@ public class MethodInvocation {
         }
         return ResponseVO.success().data(LatestResult).msg("获取所有盘点结果成功!");
     }
+//    获取当前任务信息
     public ResponseVO getCurrentTask(String taskId)throws Exception{
-
-        List<PrecisionTask> byTaskId = taskMapper.findByTaskId(Long.parseLong(taskId));
+        List<PrecisionTask> byTaskId = taskService.findByTaskId(Long.parseLong(taskId));
         if (byTaskId!=null&&byTaskId.size()!=0){
             return ResponseVO.success().data(byTaskId.get(0)).msg("获取任务信息成功!");
         }
         return ResponseVO.error().msg("当前任务不存在!");
     }
+//    获取用户所有可视任务
     public ResponseVO getAllTask(String userId,
                                  String company,
                                  String pageIndex,
@@ -244,6 +239,7 @@ public class MethodInvocation {
         return ResponseVO.success().data(taskService.getUserAllVisibleTask(userId, company,
                 Long.parseLong(pageIndex)-1, Long.parseLong(pageSize))).msg("获取所有任务成功!");
     }
+//    获取用户选择的条件
     public ResponseVO getLatestCondition(
             String taskId){
         return ResponseVO.success().data(fieldsService.queryMaxCondition(Long.parseLong(taskId)))

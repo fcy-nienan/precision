@@ -18,6 +18,9 @@ public class PrecisionMetaEnumInfo {
     private Long fieldId;
     @Column
     private String enumCode;
+    public PrecisionMetaEnumInfo(){
+
+    }
     public static List<PrecisionMetaEnumInfo> getDefault()throws Exception{
         BufferedReader reader=new BufferedReader(new InputStreamReader((PrecisionMetaEnumInfo.class.getResourceAsStream("/MetaEnumInfo.txt"))));
         String msg="";

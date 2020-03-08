@@ -24,6 +24,9 @@ public class PrecisionMetaInfo {
     @Column
     private String supportOperators;
 
+    public PrecisionMetaInfo() {
+    }
+
     public static List<PrecisionMetaInfo> getDefault()throws Exception{
         BufferedReader reader=new BufferedReader(new InputStreamReader((PrecisionMetaInfo.class.getResourceAsStream("/MetaInfo.txt"))));
         String msg="";

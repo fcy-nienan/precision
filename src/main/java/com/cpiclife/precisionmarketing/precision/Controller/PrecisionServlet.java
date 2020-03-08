@@ -36,6 +36,11 @@ import static com.cpiclife.precisionmarketing.precision.Model.TaskEnum.WAIT_SAMP
  * Date:2020/3/7 22:00
  */
 public class PrecisionServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doPost(req, resp);
+    }
+//    根据字符串中的数组获取相应的属性值
     public String[] getParams(String[] strings,HttpServletRequest request){
         String[] result=new String[strings.length];
         for (int i = 0; i < strings.length; i++) {
@@ -45,10 +50,6 @@ public class PrecisionServlet extends HttpServlet {
             }
         }
         return result;
-    }
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doPost(req, resp);
     }
     private ResponseVO invokeMethod(HttpServletRequest req,String type,MethodInvocation methodInvocation){
         Method[] declaredMethods = MethodInvocation.class.getDeclaredMethods();
@@ -60,36 +61,39 @@ public class PrecisionServlet extends HttpServlet {
         Object result=null;
         for(int i=0;i<declaredMethods.length;i++){
             if (declaredMethods[i].getName().equals(wrapper.method)){
-                String[] requestValues=getParams(wrapper.params,req);
-                System.out.println("开始调用方法:"+wrapper.method+"---请求参数属性:"+Arrays.toString(wrapper.params)+"---请求参数值:"+ Arrays.toString(requestValues));
                 try {
+                    String[] requestValues=getParams(wrapper.params,req);
+
+                    System.out.println("开始调用方法:"+wrapper.method+"---请求参数属性:"+Arrays.toString(wrapper.params)+"---请求参数值:"+ Arrays.toString(requestValues));
+
+//                    该方法有参数
                     if (requestValues!=null) {
                         result = declaredMethods[i].invoke(methodInvocation, requestValues);
-                    }else{
+                    }else{//该方法无参数
                         result=declaredMethods[i].invoke(methodInvocation);
                     }
                 } catch (Exception e){
-                    System.out.println("调用方法失败!");
                     e.printStackTrace();
+                    return ResponseVO.error().msg("调用方法失败!");
                 }
                 return (ResponseVO) result;
             }
         }
         System.out.println("未找到请求映射的方法名:"+wrapper);
-        return ResponseVO.error().msg("请求失败!");
+        return ResponseVO.error().msg("请求失败--未找到相应的方法!");
     }
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println("doPost");
         String type=req.getParameter("type");
         WebApplicationContext webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(this.getServletContext());
-        PrecisionTaskService taskService = (PrecisionTaskService)webApplicationContext.getBean("precisionTaskService");
         MethodInvocation methodInvocation = (MethodInvocation)webApplicationContext.getBean("methodInvocation");
 //        调用后台方法
         Object o = invokeMethod(req,type, methodInvocation);
 //        写入响应流
         ObjectMapper mapper=new ObjectMapper();
+//        将返回对象转化为json字符串
         String s = mapper.writeValueAsString(o);
+//        返回给前台
         resp.setContentType("application/json; charset=utf-8");
         OutputStream outputStream = resp.getOutputStream();
         outputStream.write(s.getBytes("utf-8"));

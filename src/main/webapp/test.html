@@ -11,10 +11,9 @@
 </head>
 <body>
 <div id="app">
-        <i-select :model.sync="x" size="small" style="width:100px">
+        <i-select :model.sync="model2" size="small" style="width:100px">
             <i-option v-for="item in cityList" :value="item.value">{{ item.label }}</i-option>
         </i-select>
-        <p>{{ x }}</p>
         <i-select :model.sync="model3" style="width:100px">
             <i-option v-for="item in cityList" :value="item.value">{{ item.label }}</i-option>
         </i-select>
@@ -23,7 +22,6 @@
         </i-select>
 </div>
 <script>
-    var x='';
     new Vue({
         el:"#app",
         data () {
