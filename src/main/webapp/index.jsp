@@ -46,13 +46,13 @@
                     <i-col span="8">
                         {{ vo.metaInfo.fieldName }}
                     </i-col>
-                    <i-col span="6">
-                        <i-select  @on-change="operatorChange($event,vo.metaInfo.fieldCode,vo.metaInfo.fieldId,vo.metaInfo.fieldName,vo.metaInfo.fieldType,index)"  placeholder="请选择关系" clearable style="width:260px">
+                    <i-col span="8">
+                        <i-select   @on-change="operatorChange($event,vo.metaInfo.fieldCode,vo.metaInfo.fieldId,vo.metaInfo.fieldName,vo.metaInfo.fieldType,index)"  placeholder="请选择关系" clearable style="width:260px">
                             <i-option v-for="(operator,index) in vo.operators" :value="operator">{{ operator }}</i-option>
                         </i-select>
                     </i-col>
-                    <i-col span="6">
-                        <i-select  filterable @on-change="changeValue($event,vo.metaInfo.fieldCode,vo.metaInfo.fieldId,vo.metaInfo.fieldName,vo.metaInfo.fieldType,index)"  :multiple="multiFlag[index]" placeholder="枚举值" style="width:260px">
+                    <i-col span="8">
+                        <i-select  filterable ref="enum" @on-change="changeValue($event,vo.metaInfo.fieldCode,vo.metaInfo.fieldId,vo.metaInfo.fieldName,vo.metaInfo.fieldType,index)"  :multiple="multiFlag[index]" placeholder="枚举值" style="width:260px">
                             <i-option v-for="(enumValue,index) in vo.enumInfo" :value="enumValue.enumCode">{{ enumValue.enumValue }}</i-option>
                         </i-select>
                     </i-col>
@@ -181,11 +181,11 @@
                 var chineseValue=''
                 if(enumCode instanceof Array){
                     for (var i = 0; i < con.length; i++) {
-                        console.log(fieldId == con[i].metaInfo.fieldId)
+                        // console.log(fieldId == con[i].metaInfo.fieldId)
                         if (fieldId == con[i].metaInfo.fieldId) {
                             var enumList = con[i].enumInfo;
                             for (var j = 0; j < enumList.length; j++) {
-                                console.log(enumCode.indexOf(enumList[j].enumCode))
+                                // console.log(enumCode.indexOf(enumList[j].enumCode))
                                 if(enumCode.indexOf(enumList[j].enumCode)!=-1){
                                     chineseValue=chineseValue+","+enumList[j].enumValue;
                                 }
@@ -196,7 +196,7 @@
                     return chineseValue
                 }else {
                     for (var i = 0; i < con.length; i++) {
-                        console.log(fieldId == con[i].metaInfo.fieldId)
+                        // console.log(fieldId == con[i].metaInfo.fieldId)
                         if (fieldId == con[i].metaInfo.fieldId) {
                             var enumList = con[i].enumInfo;
                             for (var j = 0; j < enumList.length; j++) {
@@ -334,17 +334,28 @@
                 });
             },
             operatorChange:function(v,fieldCode,fieldId,fieldName,fieldType,index){
+                var o=this.selectedValue[index];
+                console.log(this.$refs)
+                this.$refs["enum"][index].reset();
                 if(v=="in"){
                     if(!this.multiFlag[index]){
                         this.$set(this.multiFlag,index,true)
                     }
+                    // o.enumCode=[]
+                    // var newEnum=new Array()
+                    // newEnum.push(o.enumCode)
+                    // o.enumCode=newEnum;
                 }else{
                     if(this.multiFlag[index]){
                         this.$set(this.multiFlag,index,false)
                     }
+                    console.log(o.enumCode instanceof Array)
+                    // if (o.enumCode instanceof Array){
+                    //     o.enumCode=''
+                    // }
+                    // o.enumCode=null
                 }
-                var o=this.selectedValue[index];
-                console.log(o);
+                //选择的值都保存在selectedValue中
                 if (JSON.stringify(o)=="{}"){
                     o=new Object();
                     o.id=''
@@ -359,8 +370,9 @@
                 o.fieldName=fieldName
                 o.fieldType=fieldType
                 o.comparisonOperator=v;
+                console.log("---"+JSON.stringify(o.enumCode))
                 this.$set(this.selectedValue,index,o);
-                console.log(this.selectedValue)
+                // console.log(this.selectedValue)
             },
             changeValue:function (v,fieldCode,fieldId,fieldName,fieldType,index) {
                 var o=this.selectedValue[index];
@@ -376,10 +388,9 @@
                 o.fieldId=fieldId
                 o.fieldName=fieldName
                 o.fieldType=fieldType
-
                 o.enumCode=v;
+                console.log("enumCode:"+v)
                 this.$set(this.selectedValue,index,o);
-                console.log(this.selectedValue)
             },
             info:function (res) {
                 if(res.code=='200'){

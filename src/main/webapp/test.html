@@ -11,50 +11,37 @@
 </head>
 <body>
 <div id="app">
-        <i-select :model.sync="model2" size="small" style="width:100px">
-            <i-option v-for="item in cityList" :value="item.value">{{ item.label }}</i-option>
-        </i-select>
-        <i-select :model.sync="model3" style="width:100px">
-            <i-option v-for="item in cityList" :value="item.value">{{ item.label }}</i-option>
-        </i-select>
-        <i-select :model.sync="model4" size="large" style="width:100px">
-            <i-option v-for="item in cityList" :value="item.value">{{ item.label }}</i-option>
+        <i-select  size="large" style="width:100px">
+            <i-option v-for="item in person" :value="item.age">{{ item.name }}</i-option>
         </i-select>
 </div>
 <script>
-    new Vue({
+    var vue=new Vue({
         el:"#app",
         data () {
             return {
-                cityList: [
-                    {
-                        value: 'beijing',
-                        label: '北京市'
-                    },
-                    {
-                        value: 'shanghai',
-                        label: '上海市'
-                    },
-                    {
-                        value: 'shenzhen',
-                        label: '深圳市'
-                    },
-                    {
-                        value: 'hangzhou',
-                        label: '杭州市'
-                    },
-                    {
-                        value: 'nanjing',
-                        label: '南京市'
-                    },
-                    {
-                        value: 'chongqing',
-                        label: '重庆市'
+                person:[]
+            }
+        },
+        mounted:function () {
+            this.getAllData();
+        },
+        methods: {
+            getAllData(){
+                var url = "demo.json"/*json文件url，本地的就写本地的位置，如果是服务器的就写服务器的路径*/
+                var request = new XMLHttpRequest();
+                request.open("get", url);/*设置请求方法与路径*/
+                request.send(null);/*不发送数据到服务器*/
+                request.onload = function () {/*XHR对象获取到返回信息后执行*/
+                    if (request.status == 200) {/*返回状态为200，即为数据获取成功*/
+                        var json = JSON.parse(request.responseText);
+                        for(var i=0;i<json.length;i++){
+                            console.log(json[i].name);
+                            vue.$set(this.person,i,json[i])
+                        }
+                        console.log(json);
                     }
-                ],
-                model2: '',
-                model3: '',
-                model4: ''
+                }
             }
         }
     })
