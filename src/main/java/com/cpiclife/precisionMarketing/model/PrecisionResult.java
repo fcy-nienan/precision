@@ -42,7 +42,8 @@ public class PrecisionResult {
 
     }
 
-    public PrecisionResult(Long id, Long taskId, Long times, Long resultId, Long amount, Long usedAmount, String precent, Long selected, String descartesfields, String guestGroupName) {
+    public PrecisionResult(Long id, Long taskId, Long precisionId,Long times, Long resultId, Long amount, Long usedAmount, String precent, Long selected, String descartesfields, String guestGroupName) {
+        this.precisionId=precisionId;
         this.id = id;
         this.taskId = taskId;
         this.times = times;

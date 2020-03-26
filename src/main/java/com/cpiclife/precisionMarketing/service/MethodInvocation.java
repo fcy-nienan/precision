@@ -75,6 +75,7 @@ public class MethodInvocation {
             "checkTaskValid:checkTaskValid:precisionId,userId\r\n" +
             "countFinished:countFinished:\r\n" +
             "condition:condition:\r\n"+
+            "countFinished:countFinished:\r\n"+
             "flushCondition:flushCondition:";
     static {
         try{
@@ -110,7 +111,10 @@ public class MethodInvocation {
             e.printStackTrace();
         }
     }
-
+    public ResponseVO countFinished()throws Exception{
+        countTask.countFinished();
+        return ResponseVO.success();
+    }
     public ResponseVO flushCondition()throws Exception{
         return ResponseVO.success().data(infoService.flushCondition()).msg("获取所有可选条件成功!");
     }
@@ -260,9 +264,46 @@ public class MethodInvocation {
         try {
             fieldsService.save(vo,task.getId());
         }catch (Exception e){
+            e.printStackTrace();
             return ResponseVO.interError().msg("服务器内部错误!");
         }
         return ResponseVO.success().msg("提交盘点任务成功!");
+    }
+    private void flushResult(String precisionId,List<PrecisionResult> LatestResult){
+        for (PrecisionResult precisionResult : LatestResult) {
+            precisionResult.setPrecisionId(Long.parseLong(precisionId));
+            if(precisionResult.getFieldsName()==null){
+                String english=precisionResult.getDescartesfields();
+                String[] arr=english.split("\\|\\&\\|");
+                if(arr.length==1){//后台盘点没有值，只插入了一个nums|#|0
+                    precisionResult.setAmount(0l);
+                    precisionResult.setFieldsName("盘点无数据");
+                }else{
+                    StringBuilder builder=new StringBuilder();
+                    for(int i=0;i<arr.length-1;i++){
+                        String s=arr[i];
+                        String[] fields=s.split("\\|\\#\\|");
+                        String fieldCode=fields[0];
+                        String enumCode=fields[1];
+                        String chinese=infoService.getChineseValue(fieldCode, enumCode);
+                        builder.append(chinese).append(",");
+                    }
+                    builder.deleteCharAt(builder.length()-1);
+                    precisionResult.setFieldsName(builder.toString());
+                    String[] last=arr[arr.length-1].split("\\|\\#\\|");
+                    String mark=last[0],amount=last[1];
+                    if("nums".equals(mark)){
+                        try{
+                            precisionResult.setAmount(Long.parseLong(amount));
+                        }catch(Exception e){
+//            				如果前台出现-1说明后台插入的值不是数字
+                            precisionResult.setAmount(-1l);
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
     }
 //    获取当前任务id最新的盘点结果
     public ResponseVO getAllResult(String precisionId){
@@ -272,40 +313,7 @@ public class MethodInvocation {
     	long taskId=taskList.get(0).getTaskId();
     	//从后台获取数据，第一次获取的时候fieldName是NULL,需要解析后台传过来的结果数据
         List<PrecisionResult> LatestResult = resultService.getLastestResultByTaskId(taskId);
-        for (PrecisionResult precisionResult : LatestResult) {
-        	precisionResult.setPrecisionId(Long.parseLong(precisionId));
-        	if(precisionResult.getFieldsName()==null){
-        		String english=precisionResult.getDescartesfields();
-            	String[] arr=english.split("\\|\\&\\|");
-            	if(arr.length==1){//后台盘点没有值，只插入了一个nums|#|0
-            		precisionResult.setAmount(0l);
-            		precisionResult.setFieldsName("盘点无数据");
-            	}else{
-            		StringBuilder builder=new StringBuilder();
-            		for(int i=0;i<arr.length-1;i++){
-            			String s=arr[i];
-            			String[] fields=s.split("\\|\\#\\|");
-            			String fieldCode=fields[0];
-            			String enumCode=fields[1];
-            			String chinese=infoService.getChineseValue(fieldCode, enumCode);
-            			builder.append(chinese).append(",");
-            		}
-            		builder.deleteCharAt(builder.length()-1);
-            		precisionResult.setFieldsName(builder.toString());
-            		String[] last=arr[arr.length-1].split("\\|\\#\\|");
-            		String mark=last[0],amount=last[1];
-            		if("nums".equals(mark)){
-            			try{
-            				precisionResult.setAmount(Long.parseLong(amount));
-            			}catch(Exception e){
-//            				如果前台出现-1说明后台插入的值不是数字
-            				precisionResult.setAmount(-1l);
-            				e.printStackTrace();
-            			}
-            		}
-            	}
-        	}
-        }
+        flushResult(precisionId,LatestResult);
         resultService.saveAll(LatestResult);
         return ResponseVO.success().data(LatestResult).msg("获取所有盘点结果成功!");
     }
@@ -313,7 +321,7 @@ public class MethodInvocation {
     public ResponseVO getCurrentTask(String precisionId)throws Exception{
         List<PrecisionTask> byTaskId = taskService.findByPrecisionId(Long.parseLong(precisionId));
         if (byTaskId!=null&&byTaskId.size()!=0){
-            return ResponseVO.success().data(byTaskId.get(0)).msg("获取任务信息成功!");
+            return ResponseVO.success().data(byTaskId).msg("获取任务信息成功!");
         }
         return ResponseVO.error().msg("当前任务不存在!");
     }

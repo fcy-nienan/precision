@@ -1,8 +1,21 @@
-drop table hibernate_sequence;
-drop table precision_descartes_fields;
-drop table precision_meta_enum_info;
-drop table precision_meta_info;
-drop table precision_result;
-drop table precision_task;
+show databases;
+use fcy;
+show tables;
+delete from enuminfo;
+delete from metainfo;
+delete from task;
+delete from result;
+delete from fields;
 
+
+
+select * from enuminfo;
 select * from fields;
+select * from metainfo;
+select * from task;
+select * from result;
+
+/*盘点完成*/
+delete from result where id=5;
+update task set status=3 where id=7;
+update result set times=-1 where id=6;

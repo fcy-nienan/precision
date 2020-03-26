@@ -35,7 +35,8 @@ public class PrecisionDescartesFieldsService {
     public void save(List<PrecisionDescartesFields> vo,long taskId){
         long times=1;
 //        第一次可能没有值max返回的是0,其他都是times+1
-        long max = fieldsMapper.getMax(taskId);
+        Long max = fieldsMapper.getMax(taskId);
+        if(max==null)max=0l;
         times=max+1;
         for (int i=0;i<vo.size();i++){
             if (vo.get(i).getFieldCode()!=null&&vo.get(i).getComparisonOperator()!=null&&vo.get(i).getEnumCode()!=null) {

@@ -122,10 +122,40 @@ function getSpecialFieldsString(row){
     }
 	return enumCodeValues;
 }
-function getFieldAndEnumString(fieldId,enumCode){
+function initCondition(vue){
+    var x=localStorage.getItem("conditionString");
+    if(x!=null){
+        var data=JSON.parse(x);
+        init(data,vue);
+        return;
+    }
+    vue.$http.get(baseUrl+'/precisionServlet.do?type=condition').then(function(res){
+        vue.info(res.data)
+        if(res.data.code==200){
+            init(res.data.data,vue);
+            localStorage.setItem("conditionString",JSON.stringify(res.data.data));
+        }
+    },function(){
+        vue.$Message.error('获取所有条件失败');
+    });
+}
+function init(data,vue){
+    vue.condition=data;
+    for(var i=0;i<data.length;i++){
+        vue.multiFlag[i]=false;
+        vue.selectedValue[i]=new Object()
+        vue.selectedValue[i].equalVisible='';
+        vue.selectedValue[i].distanceVisible='display:none;';
+        vue.selectedValue[i].inVisible='display:none;';
+        vue.selectedValue[i].equalValue='';
+        vue.selectedValue[i].distanceValue=[];
+        vue.selectedValue[i].inValue=[];
+    }
+}
+function getFieldAndEnumString(fieldId,enumCode,fieldCode,condition){
 	var chineseValue='';
     var currentYear=new Date().getFullYear();
-    if(row.fieldCode!=null&&row.fieldCode=='birthdate'){
+    if(fieldCode!=null&&fieldCode=='birthdate'){
     	return currentYear-enumCode;
     }
     //判断enumCode是这种  3060100  还是这种 1,2,3,4
@@ -163,7 +193,8 @@ function getFieldAndEnumString(fieldId,enumCode){
 function getEnumValueString(row,condition){
     var enumCode=row.enumCode;
     var fieldId=row.fieldId;
-    return getFieldAndEnumString(fieldId,enumCode);
+    var fieldCode=row.fieldCode;
+    return getFieldAndEnumString(fieldId,enumCode,fieldCode,condition);
 }
 function flushValidCondition(selectedValue){
 	var x=new Array();
@@ -187,7 +218,7 @@ function flushValidCondition(selectedValue){
     console.log("刷新后的条件:"+JSON.stringify(x));
     return x;
 }
-function getValidCondition(selectedValue,specialFields){
+function getValidCondition(selectedValue){
 	console.log("原始对象:"+JSON.stringify(selectedValue))
     var x=new Array()
     for(var i=0;i<selectedValue.length;i++){

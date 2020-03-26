@@ -27,6 +27,9 @@ public class PrecisionResultService {
         return results;
     	
     }
+    public List<PrecisionResult> findByTaskIdAndTimes(Long taskId,Long max){
+        return resultMapper.findByTaskIdAndTimes(taskId,max);
+    }
     public void save(PrecisionResult result){
         resultMapper.save(result);
     }

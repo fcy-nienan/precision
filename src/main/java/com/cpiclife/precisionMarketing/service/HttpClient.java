@@ -12,8 +12,8 @@ public class HttpClient {
         int max=3;
         while(max>0){
             try{
-            	String msg=HttpClient.SendJson(json,url);
-            	System.out.println("httpClient:Msg:"+msg);
+//            	String msg=HttpClient.SendJson(json,url);
+//            	System.out.println("httpClient:Msg:"+msg);
             	break;
             }catch(Exception e){
             	max=max-1;

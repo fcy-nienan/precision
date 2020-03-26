@@ -30,12 +30,15 @@
     <div style="text-align:center;">
         <div style="width:100%;height:40px;text-align:center;">
             <Row style="text-align:center;">
-                <i-button type="info" :disabled="addGroup" @click="showModal=true">添加客群</i-button>
+                <i-button type="info" :disabled="addGroup" @click="openModal">添加客群</i-button>
                 <i-button type="info" :disabled="startDispatcherDisable" @click="startConfirm">开始下发</i-button>
             </Row>
         </div>
     </div>
-    <i-table stripe border height="400" ref="selection"  :columns="resultColumns"  :no-data-text="noDataShow">
+    <i-table stripe border height="400" ref="selection"
+             :columns="resultColumns"
+             :data="splitCondition"
+             :no-data-text="noDataShow">
     </i-table>
     <Modal :value.sync="showModal" width="90%" height="100%" title="筛选条件" @on-ok="ok" @on-cancel="cancel" scrollable title="筛选条件">
     	<div style="width:100%;text-align:center;height:450px;overflow:scroll;">
@@ -60,7 +63,6 @@
                     	<i-col span="8">
                     		<Date-picker v-model="selectedValue[index].equalValue" 
                     			:style="selectedValue[index].equalVisible"
-                    			@on-change="dateChange($event,index)"
                     			type="date"
                     			placement="bottom-end" placeholder="选择日期"
                     			style="width:250px"
@@ -68,7 +70,6 @@
                     		</Date-picker>
                     		<Date-picker v-model="selectedValue[index].distanceValue" 
                     			:style="selectedValue[index].distanceVisible"
-                    			@on-change="dateChange($event,index)"
                     			type="daterange"
                     			placement="bottom-end" placeholder="选择日期"
                     			style="width:250px"
@@ -89,6 +90,7 @@
     </Modal>
 </div>
 <script>
+    var guestSet=new Set();
     var vue=new Vue({
         el:"#task",
         data(){
@@ -109,17 +111,19 @@
                 company:"<%=company%>",
                 precisionId:"<%=precisionId%>",
                 intoPrecisionId:"<%=precisionId%>",
-                currentTask:{},
-                resultSimpleColumns:[
-                               {
-                                   title:"条件描述",
-                                   key:"fieldsName",
-                               },
-                               {
-                                   title:"数量",
-                                   key:"amount",
-                               }
-                           ],                   
+
+                currentTask:[],
+
+                resultSimpleColumns: [
+                    {
+                        title: "条件描述",
+                        key: "fieldsName",
+                    },
+                    {
+                        title: "数量",
+                        key: "amount",
+                    }
+                ],
                 //用户的切分配置
                 resultColumns:[
                     {
@@ -165,6 +169,7 @@
                                     },
                                     on: {
                                         input: function (event) {
+                                            guestSet.delete(params.row.guestGroupName)
                                             params.row.guestGroupName = event.target.value
                                         }
                                     }
@@ -194,138 +199,158 @@
                                 }
                             }, params.row.$isEdit ? '保存' : '编辑')
                         }
+                    },
+                    {
+                        title:'删除',
+                        key:'delete',
+                        render:(h,params)=>{
+                            return h('Button',{
+                                props:{
+                                    type:'text',
+                                    size:'small'
+                                },
+                                on:{
+                                    click:()=>{
+                                        this.deleteSplitCondition(params.row);
+                                    }
+                                }
+                            },'删除')
+                        }
                     }
                 ],
-                result:[],
-                sampleResult:[],
+                //盘点结果的总数量
+                amount:0,
+                result:[],//盘点的数量
+                splitCondition:[],//切分的配置显示
+                splitResult:[],//切分的配置
+                guestGroupNameSet:[],
+                rowId:0,
 
               //后台的所有条件
                 condition:[],
                 //第三个是否是多选框
                 multiFlag:[],
-                //所有变量的个数
-                variableSize:0,
                 //用户当前已经选择的值
                 selectedValue:[],
-				//盘点结果的总数量
-                amount:0
-                            
             }
         },
-        mounted:function () {                                                                                                    
+        created:function () {
             this.$Message.loading("正在加载数据!");
+            this.getAllCondition()
             this.getCurrentTask();
             this.getAllResult();
         },
         methods:{
+            openModal(){
+              this.showModal=true;
+                for (var i = 0; i < this.condition.length; i++) {
+                    if(this.condition[i].metaInfo.fieldType=='enum') {
+                        this.$refs["enum"][i].reset();
+                    }
+                }
+            },
+            deleteSplitCondition(row){
+                guestSet.delete(row.guestGroupName)
+                for(var i=0;i<this.splitCondition.length;i++){
+                    if(this.splitCondition[i].rowId==row.rowId){
+                        this.splitCondition.splice(i,1)
+                        break;
+                    }
+                }
+                console.log(this.splitCondition)
+            },
             ok(){
-                this.showModal=false;
             	 //这个方法需要筛选出selectedValue中真正选择了的数据
                 var x=flushValidCondition(this.selectedValue);
                 if(x.length==0){
                     this.$Message.error("请先选择切分条件!")
                 }else{
                     console.log("选择的条件:"+x);
-                    var split=new Object();
-                    var fieldDesc='';
+                    var rowObject=new Object();
+                    var fieldsName='';
+                    var descartesfields='';
                     for(var i=0;i<x.length;i++){
 						var fieldName=x[i].fieldName;
 						var fieldId=x[i].fieldId;
+						var fieldCode=x[i].fieldCode;
 						var enumCode=x[i].enumCode;
-						var chinese=getFieldAndEnumString(fieldId,enumCode);
-						var str=fieldName+"-"+chinese+","
-						fieldDesc+=str;
+						var operator=x[i].comparisonOperator;
+						var chinese=getFieldAndEnumString(fieldId,enumCode,fieldCode,vue.condition);
+						var str=fieldName+","+chinese+","
+                        fieldsName+=str;
+						var dimension=fieldCode+"|#|"+operator+"|#|"+enumCode+"|&|";
+                        descartesfields+=dimension;
                     }
-                    
+                    descartesfields=descartesfields.substr(0,descartesfields.length-3);
+                    fieldsName=fieldsName.substr(0,fieldsName.length-1)
+
+                    rowObject.rowId=this.rowId;
+                    this.rowId=this.rowId+1;
+                    rowObject.id=0;
+                    rowObject.descartesfields=descartesfields;
+                    rowObject.taskId=this.currentTask[0].taskId;
+                    rowObject.precisionId=this.currentTask[0].precisionId;
+                    rowObject.times=-1;
+                    rowObject.selected=1;
+                    rowObject.resultId=null;
+                    rowObject.fieldsName=fieldsName;
+                    rowObject.amount='';
+                    rowObject.usedAmount=this.amount;
+                    rowObject.precents='';
+                    rowObject.guestGroupName='';
+                    this.splitCondition.push(rowObject);
                 }
+                console.log(this.splitCondition)
+                this.showModal=false;
             },
             cancel(){
 
             },
-        	addGroupAction(){
-				this.$refs["selection"].data=this.result
-        	},
             handleEdit (row) {
                 this.$set(row, '$isEdit', true)
             },
             handleSave (row) {
-                var flag=true
-                if(row.amount==0){
-                    this.$Message.warning("数量为0,无法配置!");
-                    flag=false;
+                if(row.guestGroupName==null||row.guestGroupName==''){
+                    this.$Message.warning("请输入客群名称!")
+                    row.guestGroupName='';
+                    this.$set(row, '$isEdit', false)
+                    return;
+                }
+                if(guestSet.has(row.guestGroupName)){
+                    this.$Message.warning("不能添加相同的客群!")
+                    row.guestGroupName='';
+                    this.$set(row,"$isEdit",false);
+                    return;
                 }
                 var reg = new RegExp("^[0-9]*$");
                 if(row.usedAmount==null||row.usedAmount==''||!reg.test(row.usedAmount)){
                     this.$Message.warning("配置量不合理!")
-                    flag=false
+                    row.usedAmount='';
+                    this.$set(row, '$isEdit', false)
+                    return;
                 }
-                if(row.usedAmount>row.amount){
-					this.$Message.warning("配置量过多");
-					flag=false;
-                }
-                if(!flag){
-                	row.usedAmount='';
-                }
-                if(row.guestGroupName==null||row.guestGroupName==''){
-                    this.$Message.warning("请输入客群名称!")
-                    flag=false
-                }
-                this.$set(row, '$isEdit', false)
-                if(flag){
-                    //如果已经存在了直接替换
-                    for(var i=0;i<this.sampleResult.length;i++){
-						var o=this.sampleResult[i];
-						if(o.id==row.id){
-							this.sampleResult[i]=row;
-							return;
-						}
+                for(var i=0;i<this.splitCondition.length;i++){
+                    if(row.rowId==this.splitCondition[i].rowId){
+                        this.$set(this.splitCondition,i,row);
+                        break;
                     }
-                    this.sampleResult.push(row);
                 }
-            },
-            initCondition:function(data){
-            	this.condition=data;
-                this.variableSize=data.length;
-                for(var i=0;i<this.variableSize;i++){
-                    this.multiFlag[i]=false;
-                    this.selectedValue[i]=new Object()
-                    this.selectedValue[i].equalVisible='';
-                    this.selectedValue[i].distanceVisible='display:none;';
-                    this.selectedValue[i].inVisible='display:none;';
-                    this.selectedValue[i].equalValue='';
-                    this.selectedValue[i].distanceValue=[];
-                    this.selectedValue[i].inValue=[];
-                    
-                }
-                this.startCountDisable=false;
-                this.selectConditionDisable=false;
+                guestSet.add(row.guestGroupName);
+                this.$set(row, '$isEdit', false)
             },
             getAllCondition:function(){
-                var x=localStorage.getItem("conditionString");
-                if(x!=null){
-					var data=JSON.parse(x);
-					this.initCondition(data);
-					return;
-                }
-                this.$http.get(baseUrl+'/precisionServlet.do?type=condition').then(function(res){
-                    this.info(res.data)
-                    if(res.data.code==200){
-                        this.initCondition(res.data.data);
-                        localStorage.setItem("conditionString",JSON.stringify(res.data.data));
-                    }
-                },function(){
-                    this.$Message.error('获取所有条件失败');
-                });
+                initCondition(this)
             },
             startConfirm(){
+                console.log(this.splitCondition);
 				if(confirm("确认开始下发?")){
 					this.startDispatcher();
 				}
             },
         	startDispatcher:function(){
                 var result=new Array();
-                for(var i=0;i<this.sampleResult.length;i++){
-                    var o=this.sampleResult[i];
+                for(var i=0;i<this.splitCondition.length;i++){
+                    var o=this.splitCondition[i];
                     if(o.usedAmount!=null&&o.usedAmount!=''&&
                             o.usedAmount!=0&&o.usedAmount!='0'&&
                     o.guestGroupName!=null&&o.guestGroupName!=''){
@@ -347,7 +372,7 @@
                     emulateJSON:true
                 }).then(function (res) {
                     this.info(res.data);
-                    this.flushPage();
+                    this.flushPageStatus();
                 },function (e) {
                     this.$Message.error("下发请求失败!"+e)
                 });
@@ -358,9 +383,9 @@
                         if(res.data.code==200){
                             this.result=res.data.data;
                             for(var i=0;i<this.result.length;i++){
-								this.count+=this.result[i].amount;
+								this.amount+=this.result[i].amount;
                             }
-                            console.log("切分的总数量:"+this.count);
+                            console.log("盘点的总数量:"+this.count);
                             this.flushPageStatus();
                         }
                     },function () {
@@ -372,18 +397,14 @@
                     .then(function (res) {
                         if(res.data.code==200) {
                             this.currentTask = res.data.data;
-                            this.taskId=this.currentTask.taskId;
-                            this.precisionId=this.currentTask.precisionId;
-                            if(res.data.data.userId!=this.userId){
-                                this.forbidOperate()
-                            }
+                            this.flushPageStatus();
                         }
                     },function () {
                         this.$Message.error("获取任务状态失败!");
                     })
             },
             flushPageStatus:function(){
-              var data=this.currentTask;
+              var data=this.currentTask[0];
               console.log("开始刷新页面状态:")
               console.log(this.currentTask)
               this.status=data.status
@@ -401,19 +422,13 @@
               }else if(this.status==10){//待抽样
                   this.startDispatcherDisable=true;
                   this.addGroup=true;
-                  this.addGroupAction()
               }else if(this.status==11){//抽样中
                   this.startDispatcherDisable=true;
                   this.addGroup=true;
-                  this.addGroupAction()
               }else if (this.status==12){//上载完成
                   this.startDispatcherDisable=true;
                   this.addGroup=true;
-                  this.addGroupAction()
               }
-            },
-            flushPage:function(){
-                location.href = baseUrl+'/precisionMarketing/task.jsp?userId='+this.userId+'&precisionId='+this.precisionId+'&company='+this.company;
             },
             operatorChange:function(v,metaInfo,index){
                 var o=this.selectedValue[index];

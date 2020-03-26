@@ -15,7 +15,6 @@
     }else{
         System.out.println("非法请求!"+new Date());
     }
-
 %>
 <html>
 <head>
@@ -31,15 +30,13 @@
 <body>
 <div id="div">
     <div style="width:100%;text-align:center;">
-        <i-table stripe border show-header highlight-row  height="300" style="text-align:center;"  :columns="taskColumns" :data="taskList" :no-data-text="noDataShow">
-            <template slot-scope="{ row, index }" slot="action">
-                <i-button type="primary" size="small" @click="queryInfo(row,index)" >查看盘点信息</i-button>
-            </template>
+        <i-table stripe border show-header highlight-row  height="300" style="text-align:center;"
+                 :columns="taskColumns"
+                 :data="taskList"
+                 :no-data-text="noDataShow">
         </i-table>
-        <Page :current="pageIndex" :page-size="pageSize" show-total :total="total"  @on-change="changePage"></Page>
     </div>
     <div style="text-align:center;">
-        
         <div style="width:100%;height:40px;text-align:center;">
             <Row style="text-align:center;">
             	<i-button type="info" :disabled="selectConditionDisable" @click="showModal=true">选择条件</i-button>
@@ -49,9 +46,14 @@
             </Row>
         </div>
     </div>
-<!--    下面的表格显示用户当前已经选择的条件-->
+    <%--下面的表格显示用户当前已经选择的条件--%>
     <i-table stripe border height="400" :columns="selectTableHeader" :data="showValue" :no-data-text="noDataShow"></i-table>
-    <Modal :value.sync="showModal" width="90%" height="100%" title="筛选条件" @on-ok="ok" @on-cancel="cancel" scrollable title="筛选条件">
+    <%--显示用户的盘点结果--%>
+    <i-table stripe border height="400" :columns="resultSimpleColumns" :data="result" :no-data-text="noDataShow"></i-table>
+
+    <Modal :value.sync="showModal" width="90%" height="100%" title="筛选条件"
+           @on-ok="ok"
+           @on-cancel="cancel" scrollable title="筛选条件">
     	<div style="width:100%;text-align:center;height:450px;overflow:scroll;">
             <template v-for="(vo,index) in condition">
                 <Row>
@@ -74,7 +76,7 @@
                     	<i-col span="8">
                     		<Date-picker v-model="selectedValue[index].equalValue" 
                     			:style="selectedValue[index].equalVisible"
-                    			@on-change="dateChange($event,index)"
+                    			<%--@on-change="dateChange($event,index)"--%>
                     			type="date"
                     			placement="bottom-end" placeholder="选择日期"
                     			style="width:250px"
@@ -82,7 +84,7 @@
                     		</Date-picker>
                     		<Date-picker v-model="selectedValue[index].distanceValue" 
                     			:style="selectedValue[index].distanceVisible"
-                    			@on-change="dateChange($event,index)"
+                    			<%--@on-change="dateChange($event,index)"--%>
                     			type="daterange"
                     			placement="bottom-end" placeholder="选择日期"
                     			style="width:250px"
@@ -107,15 +109,15 @@
         el:"#div",
         data(){
             return{
-                specialFields:["final_date","business_termination_date","traffic_termination_date","register_date"],
-            	startCountDisable:true,
+                noDataShow:'无数据',
+
+                startCountDisable:true,
             	selectConditionDisable:true,
             	restartCountDisable:true,
+
                 showModal:false,
-                noDataShow:'无数据',
                 //用户任务信息
                 taskList:[],
-                currentTask:{},
                 taskColumns:[
                     {
                         title:"用户id",
@@ -146,12 +148,6 @@
                         }
                     },
                     {
-                        title: '操作',
-                        slot:'action',
-                        align: 'center',
-                        sortable:true,
-                    },
-                    {
                         title:'开始日期',
                         key:'insertDate',
                         sortable:true,
@@ -162,9 +158,30 @@
                         sortable:true,
                     }
                 ],
-                pageIndex:1,
-                pageSize:5,
-                total:'',
+
+
+
+
+                result:[],
+                resultSimpleColumns: [
+                    {
+                        title: "条件描述",
+                        key: "fieldsName",
+                    },
+                    {
+                        title: "数量",
+                        key: "amount",
+                    }
+                ],
+
+                userId:"<%=userId%>",
+                precisionId:"<%=precisionId%>",
+                company:"<%=company%>",
+
+                //后台的所有条件
+                condition:[],
+                //第三个是否是多选框
+                multiFlag:[],
                 selectTableHeader:[
                     {
                         "title":"变量名",
@@ -185,23 +202,12 @@
                         "key":"enumCode",
                         sortable:true,
                         render(h,params){
-                        	var x="";
-                        	x=getString(params.row,vue.condition);
+                            var x="";
+                            x=getString(params.row,vue.condition);
                             return h('strong',x)
                         }
                     }
                 ],
-
-                userId:"<%=userId%>",
-                precisionId:"<%=precisionId%>",
-                company:"<%=company%>",
-
-                //后台的所有条件
-                condition:[],
-                //第三个是否是多选框
-                multiFlag:[],
-                //所有变量的个数
-                variableSize:0,
                 //用户当前已经选择的值
                 selectedValue:[],
             //    前台显示选择的值(有这个是因为刷新条件的时候operateChange方法会报错,空的对象)
@@ -210,16 +216,11 @@
         },
         mounted:function () {
             this.getAllCondition()
-            this.getAllTask()
             this.getCurrentTask()
+            this.getAllResult();
         },
         methods: {
-        	restartConfirm(){
-				if(confirm("确认重新开始盘点!")){
-					this.updateCount();
-				}
-            },
-        	blurChange(index){
+        	blurChange(index){//输入框失去焦点
             	var o=this.selectedValue[index];
             	if(o.inValue!=null&&o.inValue!=''){
                 	var str=o.inValue;
@@ -231,32 +232,82 @@
                 	}
             	}
         	},
-            rangedateChange(date,index){
-                
-            },
-            dateChange(date,index){
-                
-            },
-            ok(){
+            ok(){//保存条件
 				this.showModal=false;
 				this.flushCondition();
             },
             cancel(){
 				this.showModal=false;
             },
+            restartConfirm(){
+                if(confirm("确认重新开始盘点!")){
+                    this.updateCount();
+                }
+            },
+            updateCount:function(){
+                var str=getValidCondition(this.selectedValue);
+                console.log("转换为json字符串后:" + str)
+                if(str=='[]'){
+                    this.$Message.warning("请选择盘点条件!")
+                    return;
+                }
+                var precisionId=this.precisionId
+                this.$http.post(
+                    baseUrl+'/precisionServlet.do', {
+                        'type':'updateCount',
+                        "value": str,
+                        "precisionId":precisionId
+                    }, {emulateJSON: true}
+                ).then(function (res) {
+                    this.info(res.data)
+                    if(res.data.code==200) {
+                        location.href = baseUrl+'/precisionMarketing/index.jsp?userId='+this.userId+'&precisionId='+this.precisionId+'&company='+this.company;
+                    }
+                },function () {
+                    this.$Message.error("创建盘点请求失败!")
+                });
+            },
             startConfirm(){
 				if(confirm("确认开始盘点?")){
 					this.startCount();
 				}
             },
-            queryInfo(row,index){
-                var taskId=row.taskId
-                var status=row.status
-                var rowPrecisionId=row.precisionId;
-                var precisionId=this.precisionId;
-                var company=this.company;
-                var userId=this.userId;
-                location.href=baseUrl+'/precisionMarketing/task.jsp?precisionId='+rowPrecisionId+'&company='+company+'&userId='+userId;
+            startCount:function(){
+                var str=getValidCondition(this.selectedValue);
+                console.log("转换为json字符串后:" + str)
+                if(str=='[]'){
+                    this.$Message.warning("请选择盘点条件!")
+                    return;
+                }
+                this.$http.post(
+                    baseUrl+'/precisionServlet.do',
+                    {
+                        'type':'startCount',
+                        "value": str,
+                        "userId": this.userId,
+                        "precisionId":this.precisionId,
+                        "company":this.company
+                    },
+                    {emulateJSON: true}
+                ).then(function (res) {
+                    console.log(res)
+                    this.info(res.data)
+                    if(res.data.code==200){
+                        location.href = baseUrl+'/precisionMarketing/index.jsp?userId='+this.userId+'&precisionId='+this.precisionId+'&company='+this.company;
+                    }
+                },function () {
+                    this.$Message.error("创建盘点请求失败!")
+                });
+            },
+            getAllResult:function(){
+                this.$http.get(baseUrl+'/precisionServlet.do?type=getAllResult&precisionId='+this.precisionId)
+                    .then(function (res) {
+                        if(res.data.code==200){
+                            this.result=res.data.data;
+                        }
+                    },function () {
+
+                    })
             },
             flushPageStatus(data){
                 if(data==null){//第一次进入该页面,数据库是没有该任务的
@@ -264,7 +315,7 @@
                     this.restartCountDisable=true;
                     this.selectConditionDisable=false;
                 }else{
-	            	this.status=data.status
+	            	this.status=data[0].status
 	                if (this.status==1){//待盘点
 	                	this.startCountDisable=true;
 	                    this.restartCountDisable=true;
@@ -295,68 +346,17 @@
             getCurrentTask:function(){
                 this.$http.get(baseUrl+'/precisionServlet.do?type=getCurrentTask&precisionId='+this.precisionId)
                     .then(function (res) {
-                    	this.flushPageStatus(res.data.data);
+                        if(res.data.data!=null){
+                            this.taskList=res.data.data;
+                            for(var i=0;i<res.data.data.length;i++){
+                                this.taskList[i].insertDate=dateFtt("yyyy-MM-dd hh-mm",new Date(res.data.data[i].insertDate))
+                                this.taskList[i].lastModified=dateFtt("yyyy-MM-dd hh-mm",new Date(res.data.data[i].lastModified))
+                            }
+                        }
+                        this.flushPageStatus(res.data.data);
                     },function () {
                         this.$Message.error("获取任务状态失败!");
                     })
-            },
-            getAllTask:function () {
-                this.$http.post(
-                    baseUrl+'/precisionServlet.do',
-                    {
-                        'type':'getAllTask',
-                        "precisionId":this.precisionId,
-                        "userId":this.userId,
-                        "company":this.company,
-                        "pageSize":this.pageSize,
-                        "pageIndex":this.pageIndex
-                    },
-                    {emulateJSON:true}
-                ).then(function (res) {
-                        this.info(res.data)
-                        if(res.data.code==200){
-                            console.log(res.data)
-                            this.taskList=res.data.data.result;
-                            this.total=res.data.data.recordCount;
-                            for(var i=0;i<this.taskList.length;i++){
-                                this.taskList[i].insertDate=dateFtt('yyyy-MM-dd hh-mm',new Date(this.taskList[i].insertDate))
-                                this.taskList[i].lastModified=dateFtt('yyyy-MM-dd hh-mm',new Date(this.taskList[i].lastModified))
-                            }
-                        }
-                    },function (e) {
-                        this.$Message.error("网络错误或者系统出错!"+e.toString())
-                    })
-            },
-            startCount:function(){
-                var str=getValidCondition(this.selectedValue,this.specialFields);                
-                console.log("转换为json字符串后:" + str)
-                if(str=='[]'){
-                    this.$Message.warning("请选择盘点条件!")
-                    return;
-                }
-                this.$http.post(
-                    baseUrl+'/precisionServlet.do',
-                    {
-                        'type':'startCount',
-                        "value": str,
-                        "userId": this.userId,
-                        "precisionId":this.precisionId,
-                        "company":this.company
-                    },
-                    {emulateJSON: true}
-                ).then(function (res) {
-                    console.log(res)
-                    this.info(res.data)
-                    if(res.data.code==200){
-                        location.href = baseUrl+'/precisionMarketing/index.jsp?userId='+this.userId+'&precisionId='+this.precisionId+'&company='+this.company;
-                    }
-                },function () {
-                    this.$Message.error("创建盘点请求失败!")
-                });
-            },
-            changePage:function(index){
-                this.pageIndex=index;
-                this.getAllTask();
             },
             flushCondition:function(){
                 //这个方法需要筛选出selectedValue中真正选择了的数据
@@ -368,65 +368,8 @@
                     this.showValue=x;
                 }
             },
-            initCondition:function(data){
-            	this.condition=data;
-                this.variableSize=data.length;
-                for(var i=0;i<this.variableSize;i++){
-                    this.multiFlag[i]=false;
-                    this.selectedValue[i]=new Object()
-                    this.selectedValue[i].equalVisible='';
-                    this.selectedValue[i].distanceVisible='display:none;';
-                    this.selectedValue[i].inVisible='display:none;';
-                    this.selectedValue[i].equalValue='';
-                    this.selectedValue[i].distanceValue=[];
-                    this.selectedValue[i].inValue=[];
-                    
-                }
-                this.startCountDisable=false;
-                this.selectConditionDisable=false;
-            },
             getAllCondition:function(){
-                var x=localStorage.getItem("conditionString");
-                if(x!=null){
-					var data=JSON.parse(x);
-					this.initCondition(data);
-					return;
-                }
-                this.$http.get(baseUrl+'/precisionServlet.do?type=condition').then(function(res){
-                    this.info(res.data)
-                    if(res.data.code==200){
-                        this.initCondition(res.data.data);
-                        localStorage.setItem("conditionString",JSON.stringify(res.data.data));
-                    }
-                },function(){
-                    this.$Message.error('获取所有条件失败');
-                });
-            },
-            updateCount:function(){  
-            	var str=getValidCondition(this.selectedValue,this.specialFields);                
-                console.log("转换为json字符串后:" + str)
-                if(str=='[]'){
-                    this.$Message.warning("请选择盘点条件!")
-                    return;
-                }
-                var precisionId=this.precisionId
-                this.$http.post(
-                    baseUrl+'/precisionServlet.do', {
-                        'type':'updateCount',
-                        "value": str,
-                        "precisionId":precisionId
-                    }, {emulateJSON: true}
-                ).then(function (res) {
-                    this.info(res.data)
-                    if(res.data.code==200) {
-                        this.flushPage();
-                    }
-                },function () {
-                    this.$Message.error("创建盘点请求失败!")
-                });
-            },
-            flushPage:function(){
-                location.href = baseUrl+'/precisionMarketing/index.jsp?userId='+this.userId+'&precisionId='+this.precisionId+'&company='+this.company;
+                initCondition(this)
             },
             operatorChange:function(v,metaInfo,index){
                 var o=this.selectedValue[index];
@@ -464,11 +407,6 @@
 						o.distanceVisible='display:none';
 						o.inVisible='';
 					}
-                }
-                if(this.specialFields.indexOf(o.fieldCode)==-1){
-					
-                }else{
-					
                 }
                 this.$set(this.selectedValue,index,o);
             },
