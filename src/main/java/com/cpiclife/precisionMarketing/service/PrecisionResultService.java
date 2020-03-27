@@ -39,4 +39,20 @@ public class PrecisionResultService {
     public void saveAll(List<PrecisionResult> result){
     	resultMapper.saveAll(result);
     }
+
+    public static void main(String[] args) {
+        int[] array=new int[100];
+        for(int i=0;i<100;i++){
+            array[i]=i+1;
+        }
+        int[] newArr=new int[100];
+        for (int i=0;i<100;i++){
+            if ((array[i]&1)==0){
+                newArr[i]=array[i]/2;
+            }else{
+                newArr[i]=102-(array[i]/2+1)*3+array[i];
+            }
+        }
+        System.out.println(Arrays.toString(newArr));
+    }
 }

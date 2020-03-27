@@ -339,6 +339,7 @@ public class MethodInvocation {
                                  String pageIndex,
                                  String pageSize)throws Exception {
         System.out.println("getAllTask:"+userId+":"+pageIndex+":"+pageSize);
+
         return ResponseVO.success().data(taskService.getUserAllVisibleTask(precisionId,userId, company,
                 Integer.parseInt(pageIndex), Integer.parseInt(pageSize))).msg("获取所有任务成功!");
     }
