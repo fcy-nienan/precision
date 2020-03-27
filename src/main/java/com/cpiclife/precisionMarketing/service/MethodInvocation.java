@@ -330,6 +330,7 @@ public class MethodInvocation {
         if (byTaskId!=null&&byTaskId.size()!=0){
             return ResponseVO.success().data(byTaskId).msg("获取任务信息成功!");
         }
+        System.out.println("sdf");
         return ResponseVO.error().msg("当前任务不存在!");
     }
 //    获取用户所有可视任务
