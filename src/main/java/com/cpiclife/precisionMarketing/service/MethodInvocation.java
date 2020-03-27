@@ -76,6 +76,7 @@ public class MethodInvocation {
             "countFinished:countFinished:\r\n" +
             "condition:condition:\r\n"+
             "countFinished:countFinished:\r\n"+
+            "getSplitResult:getSplitResult:precisionId,userId\r\n"+
             "flushCondition:flushCondition:";
     static {
         try{
@@ -316,6 +317,12 @@ public class MethodInvocation {
         flushResult(precisionId,LatestResult);
         resultService.saveAll(LatestResult);
         return ResponseVO.success().data(LatestResult).msg("获取所有盘点结果成功!");
+    }
+    public ResponseVO getSplitResult(String precisionId,String userId){
+        boolean b = taskService.checkTaskValid(Long.parseLong(precisionId), userId);
+        if (!b)return ResponseVO.error().msg("错误的任务号!");
+        List<PrecisionResult> byPrecisionIdAndTimes = resultService.findByPrecisionIdAndTimes(Long.parseLong(precisionId), -1l);
+        return ResponseVO.success().data(byPrecisionIdAndTimes==null?new ArrayList():byPrecisionIdAndTimes).msg("获取切分结果成功!");
     }
 //    获取当前任务信息
     public ResponseVO getCurrentTask(String precisionId)throws Exception{

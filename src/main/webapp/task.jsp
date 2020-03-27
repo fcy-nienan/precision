@@ -244,9 +244,11 @@
             openModal(){
               this.showModal=true;
                 for (var i = 0; i < this.condition.length; i++) {
+                    console.log(this.condition[i].metaInfo.fieldName)
                     if(this.condition[i].metaInfo.fieldType=='enum') {
                         this.$refs["enum"][i].reset();
                     }
+                    console.log(this.condition[i].metaInfo.fieldName)
                 }
             },
             deleteSplitCondition(row){
@@ -307,6 +309,7 @@
 
             },
             handleEdit (row) {
+                guestSet.delete(row.guestGroupName)
                 this.$set(row, '$isEdit', true)
             },
             handleSave (row) {
@@ -372,7 +375,8 @@
                     emulateJSON:true
                 }).then(function (res) {
                     this.info(res.data);
-                    this.flushPageStatus();
+                    // location.href=baseUrl+'/task.jsp?userId='+this.userId+'&precisionId='
+                    // +this.precisionId+'&company='+this.company;
                 },function (e) {
                     this.$Message.error("下发请求失败!"+e)
                 });
@@ -390,6 +394,12 @@
                         }
                     },function () {
 
+                    })
+                this.$http.get(baseUrl+'/precisionServlet.do?type=getSplitResult&precisionId='+this.precisionId+"&userId="+this.userId)
+                    .then(function (res) {
+                        if(res.data.code==200){
+                            this.splitCondition=res.data.data;
+                        }
                     })
             },
             getCurrentTask:function(){

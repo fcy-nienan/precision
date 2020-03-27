@@ -32,6 +32,11 @@ public class ResultWrapper implements ResultInterface {
     }
 
     @Override
+    public List<PrecisionResult> findByPrecisionIdAndTimes(Long precisionId, Long times) {
+        return resultMapper.findByPrecisionIdAndTimes(precisionId,times);
+    }
+
+    @Override
     public void save(PrecisionResult result) {
         resultMapper.save(result);
     }

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /*
@@ -25,10 +26,12 @@ public class PrecisionResultService {
             results=resultMapper.findByTaskIdAndTimes(taskId,max);
         }
         return results;
-    	
     }
     public List<PrecisionResult> findByTaskIdAndTimes(Long taskId,Long max){
         return resultMapper.findByTaskIdAndTimes(taskId,max);
+    }
+    public List<PrecisionResult> findByPrecisionIdAndTimes(Long precisionId,Long max){
+        return resultMapper.findByPrecisionIdAndTimes(precisionId,max);
     }
     public void save(PrecisionResult result){
         resultMapper.save(result);

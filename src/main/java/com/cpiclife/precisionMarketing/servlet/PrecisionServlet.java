@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -46,18 +47,17 @@ public class PrecisionServlet extends HttpServlet {
     }
 //    根据字符串中的数组获取相应的属性值
     public String[] getParams(String[] strings,HttpServletRequest request) throws UnsupportedEncodingException{
-    	try {
-			request.setCharacterEncoding("utf-8");
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//    	try {
+//			request.setCharacterEncoding("utf-8");
+//		} catch (UnsupportedEncodingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
         String[] result=new String[strings.length];
         for (int i = 0; i < strings.length; i++) {
             String parameter = request.getParameter(strings[i]);
-            if (parameter!=null){
-                result[i]=new String(parameter.getBytes("ISO8859-1"),"UTF-8");
-            }
+            parameter=URLDecoder.decode(parameter==null?"":parameter,"UTF-8");
+            result[i]=parameter;
         }
         return result;
     }

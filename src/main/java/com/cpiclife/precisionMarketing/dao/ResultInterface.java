@@ -16,6 +16,8 @@ public interface ResultInterface {
 
     List<PrecisionResult> findByTaskIdAndTimes(Long taskId, Long max);
 
+    List<PrecisionResult> findByPrecisionIdAndTimes(Long precisionId,Long times);
+
     void save(PrecisionResult result);
 
     void saveAll(List<PrecisionResult> result);

@@ -8,10 +8,6 @@ insert into enuminfo(id,enum_value,field_id,enum_code) values(0,'未知',2614,'0
 insert into metainfo(id,field_id,field_code,field_name,field_type,support_operators) values(0,2620,'list_usage_status','是否已企划','enum','=,in,!=,notin,>,<');
 insert into enuminfo(id,enum_value,field_id,enum_code) values(0,'是',2620,'Y');
 insert into enuminfo(id,enum_value,field_id,enum_code) values(0,'否',2620,'N');
-insert into metainfo(id,field_id,field_code,field_name,field_type,support_operators) values(0,2699,'final_date','保险到期日','date','=,[],in');
-insert into metainfo(id,field_id,field_code,field_name,field_type,support_operators) values(0,2635,'business_termination_date','商业险到期日','date','=,[],in');
-insert into metainfo(id,field_id,field_code,field_name,field_type,support_operators) values(0,2636,'traffic_termination_date','交强险到期日','date','=,[],in');
-insert into metainfo(id,field_id,field_code,field_name,field_type,support_operators) values(0,2621,'register_date','初登日期','date','=,[],in');
 
 insert into metainfo(id,field_id,field_code,field_name,field_type,support_operators) values(0,2650,'birthdate','年龄','enum','=,in,!=,notin,>,<');
 insert into enuminfo(id,enum_value,field_id,enum_code) values(0,'1',2650,'1');
@@ -114,4 +110,9 @@ insert into enuminfo(id,enum_value,field_id,enum_code) values(0,'97',2650,'97');
 insert into enuminfo(id,enum_value,field_id,enum_code) values(0,'98',2650,'98');
 insert into enuminfo(id,enum_value,field_id,enum_code) values(0,'99',2650,'99');
 insert into enuminfo(id,enum_value,field_id,enum_code) values(0,'100',2650,'100');
+insert into metainfo(id,field_id,field_code,field_name,field_type,support_operators) values(0,2699,'final_date','保险到期日','date','=,[],in');
+insert into metainfo(id,field_id,field_code,field_name,field_type,support_operators) values(0,2635,'business_termination_date','商业险到期日','date','=,[],in');
+insert into metainfo(id,field_id,field_code,field_name,field_type,support_operators) values(0,2636,'traffic_termination_date','交强险到期日','date','=,[],in');
+insert into metainfo(id,field_id,field_code,field_name,field_type,support_operators) values(0,2621,'register_date','初登日期','date','=,[],in');
+
 commit;

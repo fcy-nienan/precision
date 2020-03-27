@@ -14,5 +14,6 @@ public interface ResultMapper extends JpaRepository<PrecisionResult,Long> {
     public Long getMax(@Param("taskId") Long taskId);
     public List<PrecisionResult> findByTaskId(long taskId);
     public List<PrecisionResult> findByTaskIdAndTimes(long taskId, long times);
+    public List<PrecisionResult> findByPrecisionIdAndTimes(long precisionId,long times);
 
 }
